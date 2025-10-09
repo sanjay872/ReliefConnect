@@ -30,7 +30,7 @@ npm start
 
 ### 3. Frontend Setup
 ```bash
-cd ../client
+cd ../web
 npm install
 ```
 
