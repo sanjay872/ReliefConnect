@@ -1,5 +1,5 @@
-const {getProducts}=require('./chromaDB')
-const OpenAI =require("openai")
+import {getProducts} from './chromaDB'
+import OpenAI from "openai"
 
 const openai=new OpenAI({apiKey:process.env.OPENAI_API_KEY});
 
@@ -11,7 +11,7 @@ async function textEmbedding(data){
     return response.data[0].embedding;
 }
 
-export async function updateSingleProductIntoChroma(product){
+async function updateSingleProductIntoChroma(product){
     try{
         const chromaCollections=await getProducts();
         const embeddings = await textEmbedding(`Name:${product.name}, Description: ${product.description}, price:${product.price}, Quantity: ${product.quantity}`)
@@ -28,7 +28,7 @@ export async function updateSingleProductIntoChroma(product){
     }
 }
 
-export async function deleteProductFromChroma(productId){
+async function deleteProductFromChroma(productId){
     try{
         const chromaCollections=await getProducts();
         await chromaCollections.delete({
@@ -39,4 +39,9 @@ export async function deleteProductFromChroma(productId){
     catch(error){
         console.log(`Failed to delete product with id - ${productId}`);
     }
+}
+
+module.exports={
+    updateSingleProductIntoChroma,
+    deleteProductFromChroma
 }

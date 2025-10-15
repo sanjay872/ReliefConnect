@@ -1,5 +1,5 @@
-const mongoose=require('mongoose')
-const {deleteProductFromChroma,updateSingleProductIntoChroma}=require("../vector/realtimeSync")
+import mongoose from "mongoose";
+import {deleteProductFromChroma,updateSingleProductIntoChroma} from "../vector/realtimeSync";
 
 const productSchema = new mongoose.Schema({
   name: String,
@@ -23,4 +23,4 @@ productSchema.post("deleteOne", {document:true, query:false}, async function(doc
     await deleteProductFromChroma(doc._id.toString());
 });
 
-export default mongoose.model("Product", productSchema);
+module.exports =mongoose.model("Product", productSchema);
