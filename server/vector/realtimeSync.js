@@ -1,47 +1,69 @@
-import {getProducts} from './chromaDB'
-import OpenAI from "openai"
+import OpenAI from "openai";
+import { getProductCollection } from "./chromaClient.js";
 
-const openai=new OpenAI({apiKey:process.env.OPENAI_API_KEY});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-async function textEmbedding(data){
+/**
+ * Generate a vector embedding for a given text using OpenAI.
+ */
+async function embedText(text) {
+  try {
     const response = await openai.embeddings.create({
-        model:"text-embedding-3-small",
-        input:data
+      model: "text-embedding-3-small",
+      input: text,
     });
     return response.data[0].embedding;
+  } catch (err) {
+    console.error("Failed to generate embedding:", err);
+    return null;
+  }
 }
 
-async function updateSingleProductIntoChroma(product){
-    try{
-        const chromaCollections=await getProducts();
-        const embeddings = await textEmbedding(`Name:${product.name}, Description: ${product.description}, price:${product.price}, Quantity: ${product.quantity}`)
-        await chromaCollections.upsert({
-            ids:[product._id.toString()],
-            embeddings:[embeddings],
-            metadatas: [product.toObject()],
-            documents: [`${product.name}:${product.description}`]  
-        });
-        console.log(`${product.name} is synced!`);
-    }
-    catch(error){
-        console.log(`Product update failed in Chroma - ${error}`);
-    }
+/**
+ * Add or update a single product in Chroma.
+ * Called by Mongoose post-save and post-findOneAndUpdate hooks.
+ */
+export async function updateSingleProductIntoChroma(product) {
+  try {
+    if (!product) return;
+
+    const { _id, name, description, category, quantity } = product;
+    const text = `${name}: ${description}`;
+    const embedding = await embedText(text);
+    if (!embedding) return;
+
+    const collection = await getProductCollection();
+
+    await collection.upsert({
+      ids: [_id.toString()],
+      embeddings: [embedding],
+      metadatas: [
+        {
+          id: _id.toString(),
+          name,
+          category,
+          quantity,
+        },
+      ],
+      documents: [text],
+    });
+
+    console.log(`Synced product "${name}" (${_id}) to Chroma.`);
+  } catch (err) {
+    console.error("Chroma sync (upsert) failed:", err);
+  }
 }
 
-async function deleteProductFromChroma(productId){
-    try{
-        const chromaCollections=await getProducts();
-        await chromaCollections.delete({
-            ids:[productId]
-        });
-        console.log(`Delete product with id ${productId}`);
-    }
-    catch(error){
-        console.log(`Failed to delete product with id - ${productId}`);
-    }
-}
-
-module.exports={
-    updateSingleProductIntoChroma,
-    deleteProductFromChroma
+/**
+ * Delete a product from Chroma by its ID.
+ * Called by Mongoose post-deleteOne hook.
+ */
+export async function deleteProductFromChroma(productId) {
+  try {
+    const collection = await getProductCollection();
+    await collection.delete({ ids: [productId] });
+    console.log(`Deleted product ${productId} from Chroma.`);
+  } catch (err) {
+    console.error("Chroma delete failed:", err);
+  }
 }

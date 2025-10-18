@@ -1,6 +1,11 @@
 import express from "express";
-import { createProduct, getProducts } from "../controllers/product.controller.js";
+import { createProduct, getRecommendedProducts } from "../controllers/product.controller.js";
 
-export default productRoutes = express.Router();
-productRoutes.post("/",createProduct);
-productRoutes.get("/",getProducts);
+const router = express.Router();
+
+router.post("/",createProduct);
+
+// AI
+router.get("/recommend",getRecommendedProducts);
+
+export default router;
