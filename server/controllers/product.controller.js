@@ -1,4 +1,4 @@
-import { createProductService} from "../services/product.service.js";
+import { createProductService, getProducts, deleteProduct} from "../services/product.service.js";
 import { recommendProducts } from "../services/ai.service.js";
 
 export async function createProduct(req,res){
@@ -26,4 +26,36 @@ export async function getRecommendedProducts(req, res) {
     console.error("Error:", error);
     res.status(500).json({ error: error.message });
   }
+}
+
+export async function searchProduct(req,res){
+  try{
+    const {page,size,key}=req.body;
+    const result=await getProducts(page,size,key);
+
+    res.json({
+      success:true,
+      result
+    });
+  }
+  catch(error){
+    console.log("Error: ",error);
+    res.status(500).json({error:error.message});
+  }
+}
+
+export async function deleteProductRequest(req,res){
+  const {id}=req.params;
+  if(deleteProduct(id)){
+      res.json({
+        success:true,
+        message:"Product Deleted!"
+      });
+    }
+    else{
+      res.status(500).json({
+        success:false,
+        message:"Product Deletion Failed!"
+      });
+    }
 }
