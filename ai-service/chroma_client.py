@@ -15,9 +15,19 @@ def get_chroma_collection():
         model_name="text-embedding-3-small"
     )
 
+    # Delete existing collection if it exists (one-time operation)
+    # try:
+    #     client.delete_collection(name="relief_products")
+    #     print("Deleted existing collection")
+    # except Exception as e:
+    #     print(f"No existing collection to delete: {e}")
+
+    # Create collection with explicit metadata
     collection = client.get_or_create_collection(
         name="relief_products",
-        embedding_function=embedding_func  # ✅ crucial line
+        embedding_function=embedding_func,
+        metadata={"hnsw:space": "cosine"}
     )
-
+    
+    print(f"Collection metadata: {collection.metadata}")
     return collection
