@@ -1,100 +1,117 @@
-# ReliefConnect
-ReliefConnect is a Disaster Relief System built with React.js (frontend) and Node.js + Express + MongoDB (backend). It provides an AI-powered virtual customer service to recommend relief resources, manage orders, track shipping status, and report fraud in disaster relief operations.
+# 🌍 ReliefConnect  
+> **AI-Powered Disaster Relief Management System**  
+> Built with **React.js**, **Node.js + Express + MongoDB**, and **FastAPI (AI Service)**
 
 ---
+
+## 🧩 Overview
+
+**ReliefConnect** is a full-stack disaster relief management system designed to assist victims and relief organizations through an intelligent AI-powered platform.  
+It enables users to:
+- 🧠 Get **AI-driven product recommendations** (food, shelter, medicine, etc.)
+- 🛒 Place and track **relief orders**
+- 🚚 Monitor **shipping status**
+- ⚠️ Report **fraudulent activities**
+
+---
+
+## ⚙️ Tech Stack
+
+| **Layer** | **Technology** | **Description** |
+|------------|----------------|-----------------|
+| **Frontend** | ⚛️ **React.js + Vite** | Interactive UI for users to request aid and track orders |
+| **Backend** | ⚡ **Node.js + Express** | Handles products, orders, and integration with AI service |
+| **Database** | 🍃 **MongoDB** | Stores user, product, and order data |
+| **Vector DB** | 🧠 **ChromaDB (Docker)** | Enables semantic search for product recommendations |
+| **AI Engine** | 🧩 **FastAPI + LangGraph + OpenAI GPT-4o-mini** | Powers intelligent intent classification and product suggestions |
+| **Data Exchange** | 🌐 **JSON over HTTP** | Connects all services together |
+
+---
+
+## 🚀 Quick Start
+
+### 1️⃣ Clone Repository
+
 ```bash
 git clone https://github.com/your-username/reliefconnect.git
 cd reliefconnect
 ```
 
+### 2️⃣ Backend Server & AI-Service Setup
 
-### 2. Backend Setup
-```bash
-cd server
-npm install
-```
+Refer to:
 
+[📘 Server README](https://github.com/sanjay872/ReliefConnect/blob/dev/ai-service/README.md)
 
-Create a `.env` file in `server/` with:
-```env
-MONGO_URI=your_mongodb_connection_string
-PORT=5000
-```
+[🧠 AI-Service README](https://github.com/sanjay872/ReliefConnect/blob/dev/server/README.md)
 
+### 3️⃣ Frontend Setup
 
-Run the backend:
-```bash
-npm start
-```
+Refer to:
 
+[💻 Client README](https://github.com/sanjay872/ReliefConnect/blob/dev/web/README.md)
 
-### 3. Frontend Setup
-```bash
-cd ../web
-npm install
-```
+# 📊 Demo Flow
 
+🧍 User visits the Recommend Page and enters a query (e.g., “I need food and shelter”).
 
-Run the frontend:
-```bash
-npm start
-```
+🤖 The AI Service (FastAPI) classifies the intent and searches ChromaDB for matching kits.
 
+🎯 The backend returns a ranked list of relevant relief products.
 
-Frontend will run on `http://localhost:3000` and backend on `http://localhost:5000`.
+🛒 The user confirms and fills the Order Form.
 
+📦 An Order ID is generated and stored in MongoDB.
 
----
+🔍 The user can later track the order or report fraud via the UI.
 
+# 👥 Team Roles
+## 🧩 Roles and Responsibilities
 
-## 🌐 API Endpoints
-
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/recommend` | POST | Get AI-powered disaster relief recommendation |
-| `/api/order` | POST | Place an order (request) |
-| `/api/order/:id` | GET | Fetch order details by ID |
-| `/api/status` | POST | Upload image, get refund/replace/escalate decision |
-| `/api/fraud` | POST | Report fraudulent transaction |
-
+| Role | Responsibilities |
+|------|------------------|
+| 🧠 **Backend Developer (AI & DB)** | Node.js APIs, MongoDB models, real-time Chroma sync, FastAPI integration |
+| 💻 **Frontend Developer (UI/UX)** | React components, chatbot interface, order forms, visual styling |
 
 ---
 
+## ⚙️ Key Commands
 
-## 📊 Demo Flow
+| Task | Command |
+|------|----------|
+| 🐳 **Run Chroma in Docker** | `docker run -d --name chroma -p 8000:8000 -v ./chroma-data:/chroma/chroma chromadb/chroma:latest` |
+| 🚀 **Run Node.js Server (Dev Mode)** | `npm run dev` |
+| 🤖 **Run AI Service (FastAPI)** | `uvicorn app:app --host localhost --port 8001 --reload` |
+| 📦 **Install All Dependencies** | `npm install` *(run in both `/server` and `/client` folders)* |
+| ❤️ **Check Chroma Health** | Visit [http://localhost:8000/api/v1/heartbeat](http://localhost:8000/api/v1/heartbeat) |
 
+# ✅ Future Enhancements
 
-1. User visits **Recommend Page** and enters needs (e.g., “food”, “shelter”).
-2. Backend AI Agent suggests the best service.
-3. User confirms and completes an order form.
-4. System stores the request and generates an **Order ID**.
-5. Later, user can **track status** or **report fraud** with supporting images.
+🤝 User Authentication with JWT (Admin/User roles)
 
+☁️ Cloud Deployment via Render, AWS, or Vercel
 
----
+🧾 Image Uploads to AWS S3 for fraud reports
 
+📈 Advanced Analytics Dashboard for administrators
 
-## 👥 Team Roles
+🧩 Multi-agent AI System for product matching, order prediction, and fraud detection
 
+# 🧪 Tech Integration Summary
+| Component | Port | Purpose |
+|------------|------|----------|
+| 🟢 **Node.js Server** | `5000` | API gateway for products & orders |
+| 🧠 **ChromaDB (Docker)** | `8000` | Vector database for semantic search |
+| 🤖 **AI Service (FastAPI)** | `8001` | LLM-powered product recommendation |
 
-- **Backend Developer (AI & DB)**: Node.js APIs, MongoDB models, AI service integration.
-- **Frontend Developer (UI/UX)**: React pages, API integration, form validation, styling.
+# 📜 License
+This project was developed as part of CSP584: Enterprise Web Application Development (Final Project) at Illinois Institute of Technology.
+It is intended for educational purposes only.
 
+# 👨‍💻 Author
 
----
+Sanjay Sakthivel
+🎓 M.S. Computer Science — Illinois Institute of Technology
 
-
-## ✅ Future Enhancements
-- Real AI integration with OpenAI/Hugging Face.
-- JWT authentication for users and admins.
-- Cloud deployment (Vercel + Render/Heroku).
-- File storage with AWS S3 for uploaded images.
-- Role-based access control (admin vs. customer).
-
-
----
-
-
-## 📜 License
-This project is for educational purposes only (CSP584 Final Project).
+Ansh Kaushik
+🎓 M.S. Computer Science — Illinois Institute of Technology
