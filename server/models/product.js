@@ -2,12 +2,17 @@ import mongoose from "mongoose";
 import {deleteProductFromChroma,updateSingleProductIntoChroma} from "../vector/realtimeSync.js";
 
 const productSchema = new mongoose.Schema({
-  name: String,
-  description: String,
-  category: String,
-  quantity: Number,
-  updatedAt: { type: Date, default: Date.now }
-});
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+    category: { type: String, required: true },
+    quantity: { type: Number, required: true },
+    price: { type: Number, required: true },
+    image: { type: String, default: "📦" },
+    inStock: { type: Boolean, default: true },
+    utility: { type: String },
+    priority: { type: String, enum: ["preparedness", "urgent"], default: "preparedness" },
+  },
+  { timestamps: true });
 
 // SYNC with Chroma
 

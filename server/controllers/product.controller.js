@@ -30,8 +30,8 @@ export async function getRecommendedProducts(req, res) {
 
 export async function searchProduct(req,res){
   try{
-    const {page,size,key}=req.body;
-    const result=await getProducts(page,size,key);
+    const {page,size,category,priority}=req.body;
+    const result=await getProducts(page,size,category,priority);
 
     res.json({
       success:true,
