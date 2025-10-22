@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Typography,
@@ -8,34 +8,36 @@ import {
   Button,
   Tabs,
   Tab,
-  useTheme,
-  useMediaQuery,
+  // useTheme,
+  // useMediaQuery,
 } from "@mui/material";
 import {
-  mockKits,
+  // mockKits,
   mainCategories,
   urgentSubCategories,
   preparednessSubCategories,
 } from "../data/mockKits";
 import KitCard from "../components/KitCard";
+import { searchProduct } from "../services/api";
 
 export default function AidKits() {
   const [mainCategory, setMainCategory] = useState("urgent");
   const [selectedSubCategory, setSelectedSubCategory] = useState("All");
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [kits,setKits]=useState([]);
+  // const theme = useTheme();
+  // const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // Get current sub-categories based on main category
   const currentSubCategories =
     mainCategory === "urgent" ? urgentSubCategories : preparednessSubCategories;
 
   // Filter kits based on both main category and sub-category
-  const filteredKits = mockKits.filter((kit) => {
-    const matchesMainCategory = kit.priority === mainCategory;
-    const matchesSubCategory =
-      selectedSubCategory === "All" || kit.category === selectedSubCategory;
-    return matchesMainCategory && matchesSubCategory;
-  });
+  // const filteredKits = kits.filter((kit) => {
+  //   const matchesMainCategory = kit.priority === mainCategory;
+  //   const matchesSubCategory =
+  //     selectedSubCategory === "All" || kit.category === selectedSubCategory;
+  //   return matchesMainCategory && matchesSubCategory;
+  // });
 
   const handleMainCategoryChange = (event, newValue) => {
     setMainCategory(newValue);
@@ -45,6 +47,21 @@ export default function AidKits() {
   const handleSubCategoryChange = (category) => {
     setSelectedSubCategory(category);
   };
+
+  async function getKits(){
+    const data={
+      page:1,
+      size:100,
+      category:selectedSubCategory,
+      priority:mainCategory
+    }
+    const res=await searchProduct(data);
+    setKits(res.data.result.products);
+  }
+
+  useEffect(()=>{
+    getKits();
+  },[mainCategory,selectedSubCategory])
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -82,7 +99,10 @@ export default function AidKits() {
         </Typography>
       </Box>
 
-      {/* Main Category Tabs */}
+      {
+        kits.length!==0?
+       <>
+         {/* Main Category Tabs */}
       <Box sx={{ mb: 4 }}>
         <Tabs
           value={mainCategory}
@@ -156,40 +176,35 @@ export default function AidKits() {
           ))}
         </Box>
 
-        {/* Results Count */}
         <Typography
           variant="body2"
           color="text.secondary"
           sx={{ textAlign: "center", mb: 3 }}
         >
-          Showing {filteredKits.length} kit
-          {filteredKits.length !== 1 ? "s" : ""}
+          Showing {kits.length} kit
+          {kits.length !== 1 ? "s" : ""}
           {selectedSubCategory !== "All" && ` in ${selectedSubCategory}`}
         </Typography>
       </Box>
 
-      {/* Kits Grid */}
       <Grid container spacing={3}>
-        {filteredKits.map((kit) => (
+        {kits.map((kit) => (
           <Grid
             item
             xs={12}
             sm={6}
             md={4}
             lg={3}
-            key={kit.id}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-            }}
+            key={kit.id || kit.name}
+            sx={{ display: "flex", flexDirection: "column" }}
           >
             <KitCard kit={kit} />
           </Grid>
         ))}
       </Grid>
-
-      {/* Empty State */}
-      {filteredKits.length === 0 && (
+       </>
+       :
+       <>
         <Box
           sx={{
             textAlign: "center",
@@ -214,7 +229,8 @@ export default function AidKits() {
             View All Kits
           </Button>
         </Box>
-      )}
+       </>
+      }
     </Container>
   );
 }

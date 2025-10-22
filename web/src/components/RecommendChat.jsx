@@ -15,6 +15,8 @@ import {
   Grid,
   Alert,
 } from "@mui/material";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import PersonIcon from "@mui/icons-material/Person";
 import { recommend as recommendAPI } from "../services/api";
@@ -209,8 +211,8 @@ export default function RecommendChat() {
       const res = await recommendAPI(userText);
       // Process the API response and set structured recommendation
       const structuredRecommendation = {
-        items: res.items || res.recommendations || [],
-        message: res.message || "Here are some resources that might help you:",
+        items: res.products || [],
+        message: res.response || "Sorry, we got no more stocks",
         timestamp: new Date().toISOString(),
       };
 
@@ -259,8 +261,8 @@ export default function RecommendChat() {
     try {
       const res = await recommendAPI(last.text);
       const structuredRecommendation = {
-        items: res.items || res.recommendations || [],
-        message: res.message || "Here are some resources that might help you:",
+        items: res.products || [],
+        message: res.response || "Sorry, we got no more stocks",
         timestamp: new Date().toISOString(),
       };
 
@@ -468,7 +470,45 @@ export default function RecommendChat() {
                   >
                     {m.role === "user" ? username || "You" : "AI Agent"}
                   </Typography>
-                  <Typography variant="body1">{m.text}</Typography>
+                  <Box
+                      sx={{
+                        "& p": { marginBottom: 1 },
+                        "& ul": { pl: 2, mb: 1 },
+                        "& h3": { fontWeight: "bold", fontSize: "1rem", mb: 0.5 },
+                      }}
+                    >
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          h3: ({ node, ...props }) => (
+                            <Typography
+                              variant="subtitle1"
+                              component="div"  // ✅ ensures no nested <h6> inside <p>
+                              fontWeight="bold"
+                              gutterBottom
+                              {...props}
+                            />
+                          ),
+                          li: ({ node, ...props }) => (
+                            <Typography
+                              component="li"
+                              variant="body2"
+                              {...props}
+                            />
+                          ),
+                          p: ({ node, ...props }) => (
+                            <Typography
+                              variant="body2"
+                              component="div"  // ✅ replaces <p> tag with a <div>
+                              gutterBottom
+                              {...props}
+                            />
+                          ),
+                        }}
+                      >
+                        {m.text}
+                      </ReactMarkdown>
+                    </Box>
                 </Paper>
               </Box>
             </ListItem>

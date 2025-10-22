@@ -9,6 +9,7 @@ import {
   Link,
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import {signup} from "../services/api";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -26,12 +27,16 @@ export default function SignUpPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Sign Up Form Data:", formData);
-    // TODO: Replace with actual authentication logic when backend is ready
-    // For now, just log the data and redirect to home
-    navigate("/");
+    const res= await signup({
+      fullname:formData.name,
+      email:formData.email,
+      password:formData.password
+    });
+    console.log(res);
+    navigate("/login");
   };
 
   return (

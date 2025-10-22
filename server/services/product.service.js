@@ -2,28 +2,30 @@ import Product from "../models/product.js";
 
 async function createProductService(product){
     //console.log(product);
-    const createdProduct=Product.create({
-        name:product.name,
-        description:product.description,
-        category: product.category,
-        quantity:product.quantity
-    }); 
+    const createdProduct=Product.create(product); 
     return createdProduct;
 }
 
-async function getProducts(page,size,key){
+async function getProducts(page,size,category,priority){
     const skip = (page - 1) * size;
     let products;
 
     let query = {};
 
-    if (key && key.trim() !== "") {
-        query = {
-        $or: [
-            { name: { $regex: key, $options: "i" } },
-            { description: { $regex: key, $options: "i" } }
-        ]
-        };
+    if (priority && priority.trim()!=="") {
+        if(category!=="All"){
+            query = {
+                $and: [
+                    {priority: { $regex: priority} },
+                    {category: {$regex: category}}
+                ]
+            };
+        }
+        else{
+            query = {
+                priority: {$regex: priority}
+            };
+        }
     }
 
     products = await Product.find(query)
@@ -33,11 +35,17 @@ async function getProducts(page,size,key){
 
     const totalDocuments = await Product.countDocuments(query);
 
+    const formatted = products.map(p => ({
+        id: p._id.toString(),   // ✅ rename _id → id
+        ...p.toObject(),
+        _id: undefined          // optional: remove the original field
+    }));
+
     return {
         totalSize: totalDocuments,
         totalPage: Math.ceil(totalDocuments / size),
         currentPage: page,
-        products,
+        products:formatted,
     };
 }
 

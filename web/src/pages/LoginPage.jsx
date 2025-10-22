@@ -9,9 +9,12 @@ import {
   Link,
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import {login} from "../services/api";
+import { useAuth } from "../utils/authContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const {dispatch}=useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -25,12 +28,17 @@ export default function LoginPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
     console.log("Login Form Data:", formData);
-    // TODO: Replace with actual authentication logic when backend is ready
-    // For now, just log the data and redirect to home
-    navigate("/");
+    const res=await login({
+      email:formData.email,
+      password:formData.password
+    });
+    dispatch({type:'LOGIN',payload:{
+      id:res.id
+    }})
+    navigate("/aid-kits");
   };
 
   return (

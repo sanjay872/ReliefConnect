@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: "http://localhost:5000",
   timeout: 15000,
 });
 
@@ -30,7 +30,7 @@ async function withRetries(
 }
 
 // If offlineMode true, callers should pass { offline: true } to use the mock fallback
-export const recommend = async (needs, options = {}) => {
+export const recommend = async (query, options = {}) => {
   const { offline = false } = options;
   if (offline) {
     // dynamic import of the mock to keep bundle small
@@ -39,8 +39,11 @@ export const recommend = async (needs, options = {}) => {
   }
 
   return withRetries(async () => {
-    const res = await api.post("/recommend", { needs });
-    return res.data;
+    const res = await api.post("/api/products/recommend", { query });
+    if(res){
+      return res.data;
+    }
+    return {}
   });
 };
 
@@ -59,8 +62,8 @@ export const createOrder = async (order, options = {}) => {
   }
 
   return withRetries(async () => {
-    const res = await api.post("/order", order);
-    return res.data;
+    const res = await api.post("/api/order", order);
+    return res;
   });
 };
 
@@ -70,5 +73,23 @@ export const getOrder = async (id, options = {}) => {
   const res = await api.get(`/order/${id}`);
   return res.data;
 };
+
+export const login = async (user)=>{
+  const res=await api.post("/api/user/login",user);
+  return res;
+}
+
+export const signup = async (user)=>{
+  const res=await api.post("/api/user/signup",user);
+  return res;
+}
+
+export const searchProduct = async (data)=>{
+  const res=await api.post("/api/products/search",data);
+  if(res){
+    return res;
+  }
+  return [];
+}
 
 export default api;

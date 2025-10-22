@@ -3,7 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -24,22 +24,35 @@ import DialogActions from "@mui/material/DialogActions";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Alert, Snackbar } from "@mui/material";
+import {useAuth} from "../utils/authContext"
+import { useEffect } from "react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [markSafeOpen, setMarkSafeOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Placeholder auth state
+  const [isLoggedIn,setIsLoggedIn] = useState(false);
+  const {auth,dispatch}=useAuth(); // Placeholder auth state
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const navigate=useNavigate();
+
+  useEffect(()=>{
+    if(auth==null){
+      setIsLoggedIn(false);
+    }
+    else{
+      setIsLoggedIn(true);
+    }
+  },[auth])
 
   const menuItems = [
-    { label: "Get Help", to: "/recommend", icon: "🆘" },
-    { label: "Information Hub", to: "/information", icon: "📚" },
-    { label: "Community Board", to: "/community", icon: "👥" },
-    { label: "I Want to Help", to: "/volunteer", icon: "🤝" },
+    // { label: "Information Hub", to: "/information", icon: "📚" },
+    // { label: "Community Board", to: "/community", icon: "👥" },
     { label: "Aid Kits", to: "/aid-kits", icon: "🛡️" },
+    { label: "Get Help", to: "/recommend", icon: "🆘" },
+    // { label: "I Want to Help", to: "/volunteer", icon: "🤝" },
   ];
 
   const handleMarkSafe = () => {
@@ -50,6 +63,13 @@ export default function Navbar() {
     setSnackbarOpen(true);
     setMarkSafeOpen(false);
   };
+
+  const logout=()=>{
+    console.log("log me out!!")
+    setIsLoggedIn(false);
+    dispatch({type:"LOGOUT"});
+    navigate("/");
+  }
 
   return (
     <>
@@ -85,6 +105,24 @@ export default function Navbar() {
           </Box>
 
           {/* Authentication Button */}
+          {
+            isLoggedIn?
+          <Button
+            variant="outlined"
+            onClick={logout}
+            sx={{
+              color: "#fff",
+              borderColor: "rgba(255, 255, 255, 0.5)",
+              mr: 2,
+              "&:hover": {
+                borderColor: "#fff",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+              },
+            }}
+          >
+            Logout
+          </Button>
+          :
           <Button
             component={RouterLink}
             to="/login"
@@ -101,9 +139,10 @@ export default function Navbar() {
           >
             Sign In / Sign Up
           </Button>
+          }
 
           {/* Mark Safe Button - Only visible when logged in */}
-          {isLoggedIn && (
+          {/* {isLoggedIn && (
             <Button
               variant="contained"
               startIcon={<CheckCircleIcon />}
@@ -119,17 +158,18 @@ export default function Navbar() {
             >
               I Am Safe
             </Button>
-          )}
+          )} */}
 
           {isMobile ? (
-            <IconButton
+            isLoggedIn?<IconButton
               color="inherit"
               onClick={() => setOpen(true)}
               aria-label="open menu"
             >
               <MenuIcon />
-            </IconButton>
+            </IconButton>:<></>
           ) : (
+            isLoggedIn?
             <Box sx={{ display: "flex", gap: 1 }}>
               {menuItems.map((m) => (
                 <Button
@@ -148,6 +188,8 @@ export default function Navbar() {
                 </Button>
               ))}
             </Box>
+            :
+            <></>
           )}
         </Toolbar>
       </AppBar>
@@ -176,6 +218,17 @@ export default function Navbar() {
 
             {/* Authentication Link for Mobile */}
             <ListItem disablePadding>
+              {
+                isLoggedIn?
+                <ListItemButton
+                onClick={logout}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <span style={{ fontSize: "1.2rem" }}>🔐</span>
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+              :
               <ListItemButton
                 component={RouterLink}
                 to="/login"
@@ -186,10 +239,11 @@ export default function Navbar() {
                 </ListItemIcon>
                 <ListItemText primary="Sign In / Sign Up" />
               </ListItemButton>
+              }
             </ListItem>
 
             {/* Mark Safe Link for Mobile - Only visible when logged in */}
-            {isLoggedIn && (
+            {/* {isLoggedIn && (
               <ListItem disablePadding>
                 <ListItemButton
                   onClick={() => {
@@ -203,7 +257,7 @@ export default function Navbar() {
                   <ListItemText primary="I Am Safe" />
                 </ListItemButton>
               </ListItem>
-            )}
+            )} */}
           </List>
         </Box>
       </Drawer>

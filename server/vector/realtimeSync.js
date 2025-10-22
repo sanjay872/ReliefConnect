@@ -19,15 +19,30 @@ async function embedText(text) {
   }
 }
 
-/**
- * Add or update a single product in Chroma.
- * Called by Mongoose post-save and post-findOneAndUpdate hooks.
- */
+function toMetadata(product) {
+  const safeValue = (value) => {
+    if (value === undefined || value === null) return null;
+    if (typeof value === "object") return JSON.stringify(value); // ✅ serialize objects/arrays
+    return value;
+  };
+
+  return {
+    id: safeValue(product.id),
+    name: safeValue(product.name),
+    category: safeValue(product.category),
+    price: safeValue(product.price),
+    image: safeValue(product.image),
+    inStock: safeValue(product.inStock),
+    utility: safeValue(product.utility),
+    priority: safeValue(product.priority),
+  };
+}
+
 export async function updateSingleProductIntoChroma(product) {
   try {
     if (!product) return;
 
-    const { _id, name, description, category, quantity } = product;
+    const { _id, name, description} = product;
     const text = `${name}: ${description}`;
     const embedding = await embedText(text);
     if (!embedding) return;
@@ -38,12 +53,7 @@ export async function updateSingleProductIntoChroma(product) {
       ids: [_id.toString()],
       embeddings: [embedding],
       metadatas: [
-        {
-          id: _id.toString(),
-          name,
-          category,
-          quantity,
-        },
+        toMetadata(product)
       ],
       documents: [text],
     });

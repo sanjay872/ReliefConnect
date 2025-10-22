@@ -30,8 +30,9 @@ export default function RecommendationForm() {
     setLoading(true);
     try {
       const data = await recommend(needs);
-      setRecommendationLocal(data);
-      setRecommendation(data);
+      console.log(data);
+      setRecommendationLocal(data.products);
+      setRecommendation(data.products);
       show("Recommendations received", "success");
     } catch (err) {
       const msg =

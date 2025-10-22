@@ -6,6 +6,7 @@ import dbConnection from "./config/db.js";
 import chatRoutes from "./routes/chat.route.js";
 import cartRoutes from "./routes/cart.route.js";
 import userRoutes from "./routes/user.route.js";
+import orderRoutes from "./routes/order.route.js";
 
 dotenv.config()
 dbConnection()
@@ -19,5 +20,6 @@ app.use("/api/products",productRoutes)
 app.use("/api/chat", chatRoutes);
 app.use("/api/cart",cartRoutes);
 app.use("/api/user",userRoutes);
+app.use("/api/order",orderRoutes);
 
 app.listen(PORT,()=>console.log(`Server is running at post ${PORT}`))

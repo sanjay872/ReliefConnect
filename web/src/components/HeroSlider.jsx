@@ -223,7 +223,7 @@ export default function HeroSlider() {
                 </Typography>
 
                 {/* CTA Button */}
-                <Button
+                {/* <Button
                   component={RouterLink}
                   to={slide.buttonLink}
                   variant="contained"
@@ -248,7 +248,7 @@ export default function HeroSlider() {
                   }}
                 >
                   {slide.buttonText}
-                </Button>
+                </Button> */}
               </Box>
             </Box>
           </SwiperSlide>

@@ -12,7 +12,7 @@ import {
   DialogContent,
   DialogActions,
   Divider,
-  useTheme,
+  //useTheme,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -23,7 +23,7 @@ import { useReliefPackage } from "../context/ReliefPackageContext";
 
 export default function KitCard({ kit }) {
   const [open, setOpen] = useState(false);
-  const theme = useTheme();
+  //const theme = useTheme();
   const {
     addResource,
     removeResource,

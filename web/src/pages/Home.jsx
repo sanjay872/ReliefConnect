@@ -61,7 +61,7 @@ export default function Home() {
             flexWrap: "wrap",
           }}
         >
-          <Button
+          {/* <Button
             variant="contained"
             size="large"
             component={RouterLink}
@@ -95,7 +95,7 @@ export default function Home() {
             }}
           >
             Emergency Info
-          </Button>
+          </Button> */}
         </Box>
       </Box>
 

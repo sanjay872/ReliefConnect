@@ -69,7 +69,7 @@ export default function Confirmation() {
           </Typography>
 
           {/* Track Order Button */}
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+          {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
             <Button
               variant="contained"
               size="large"
@@ -79,7 +79,7 @@ export default function Confirmation() {
             >
               Track Order
             </Button>
-          </Box>
+          </Box> */}
         </CardContent>
       </Card>
 

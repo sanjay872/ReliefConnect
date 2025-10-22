@@ -4,10 +4,10 @@ import { createProduct, getRecommendedProducts, searchProduct, deleteProductRequ
 const router = express.Router();
 
 router.post("/",createProduct);
-router.get("/search",searchProduct);
+router.post("/search",searchProduct);
 router.delete("/:id",deleteProductRequest);
 
 // AI
-router.get("/recommend",getRecommendedProducts);
+router.post("/recommend",getRecommendedProducts);
 
 export default router;

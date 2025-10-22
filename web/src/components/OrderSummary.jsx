@@ -43,46 +43,46 @@ export default function OrderSummary({ name, address, items = [], orderId }) {
   );
 }
 
-export function renderOrderHtml({ name, address, items = [], orderId }) {
-  const itemsHtml = (Array.isArray(items) ? items : [items])
-    .map(
-      (it) =>
-        `<li>${
-          typeof it === "string"
-            ? escapeHtml(it)
-            : escapeHtml(JSON.stringify(it))
-        }</li>`
-    )
-    .join("");
+// export function renderOrderHtml({ name, address, items = [], orderId }) {
+//   const itemsHtml = (Array.isArray(items) ? items : [items])
+//     .map(
+//       (it) =>
+//         `<li key={}>${
+//           typeof it === "string"
+//             ? escapeHtml(it)
+//             : escapeHtml(JSON.stringify(it))
+//         }</li>`
+//     )
+//     .join("");
 
-  return `<!doctype html>
-  <html>
-    <head>
-      <meta charset="utf-8" />
-      <title>Order Summary</title>
-      <style>
-        body{font-family: Arial, Helvetica, sans-serif; padding:20px}
-        h1{font-size:18px}
-        ul{list-style:disc; padding-left:20px}
-      </style>
-    </head>
-    <body>
-      <h1>Order Summary ${orderId ? `— ${orderId}` : ""}</h1>
-      <p><strong>Name:</strong> ${escapeHtml(name || "")}</p>
-      <p><strong>Address:</strong><br/>${escapeHtml(
-        (address || "").replace(/\n/g, "<br/>")
-      )}</p>
-      <h2>Items</h2>
-      <ul>${itemsHtml}</ul>
-    </body>
-  </html>`;
-}
+//   return `<!doctype html>
+//   <html>
+//     <head>
+//       <meta charset="utf-8" />
+//       <title>Order Summary</title>
+//       <style>
+//         body{font-family: Arial, Helvetica, sans-serif; padding:20px}
+//         h1{font-size:18px}
+//         ul{list-style:disc; padding-left:20px}
+//       </style>
+//     </head>
+//     <body>
+//       <h1>Order Summary ${orderId ? `— ${orderId}` : ""}</h1>
+//       <p><strong>Name:</strong> ${escapeHtml(name || "")}</p>
+//       <p><strong>Address:</strong><br/>${escapeHtml(
+//         (address || "").replace(/\n/g, "<br/>")
+//       )}</p>
+//       <h2>Items</h2>
+//       <ul>${itemsHtml}</ul>
+//     </body>
+//   </html>`;
+// }
 
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+// function escapeHtml(str) {
+//   return String(str)
+//     .replace(/&/g, "&amp;")
+//     .replace(/</g, "&lt;")
+//     .replace(/>/g, "&gt;")
+//     .replace(/"/g, "&quot;")
+//     .replace(/'/g, "&#39;");
+// }

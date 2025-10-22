@@ -26,7 +26,7 @@ import {
 import InventoryIcon from "@mui/icons-material/Inventory";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import OrderSummary, { renderOrderHtml } from "./OrderSummary";
+import OrderSummary from "./OrderSummary";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { useReliefPackage } from "../context/ReliefPackageContext";
@@ -182,12 +182,12 @@ export default function OrderForm() {
       try {
         res = await createOrder(payload);
       } catch (apiError) {
-        console.log("API unavailable, using offline mode");
+        console.log("API unavailable, using offline mode",apiError);
         res = await createOrder(payload, { offline: true });
       }
 
       const completeOrderData = {
-        ...res, // API response (contains id, timestamp, etc.)
+        ...res.data, // API response (contains id, timestamp, etc.)
         name: data.name,
         address: data.address,
         phone: data.phone,
@@ -196,6 +196,7 @@ export default function OrderForm() {
         items: itemsToDisplay, // Complete items with prices and quantities
         isPackage: isPackage,
       };
+      console.log(completeOrderData);
 
       setOrder(completeOrderData); // Keep for context compatibility
 
@@ -207,6 +208,8 @@ export default function OrderForm() {
       // persist username for future visits
       if (!username && data.name) setUsername(data.name);
       show("Order placed successfully", "success");
+      console.log(completeOrderData);
+
       // navigate to confirmation page with complete order data
       navigate("/confirmation", { state: { order: completeOrderData } });
     } catch (err) {
