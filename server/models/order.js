@@ -6,10 +6,13 @@ const paymentSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
+  userId:{type:String,required:true},
   name: { type: String, required: true },
+  orderId:{type:String, required:true},
   address: { type: String, required: true },
   phone: { type: String, required: true },
   email: { type: String },
+  status:{type:string, default:"processing"}, // Processing, Shipped, Out-for-Delivery, Delivered, Cancelled, Refunded  
   urgency: { type: String, default: "medium" },
   payment: paymentSchema,
   items: { type: Array, default: [] },
