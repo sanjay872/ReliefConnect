@@ -1,4 +1,4 @@
-import { createNewOrder } from "../services/order.service.js";
+import { createNewOrder, getOrders, getOrder, getOrderDetails } from "../services/order.service.js";
 
 export async function createOrder(req, res) {
   try {
@@ -21,4 +21,31 @@ export async function createOrder(req, res) {
         "This is a mock offline order response used when the network is unavailable.",
     });
   }
+}
+
+// orders/:id
+export async function getOrdersAPI(req,res){
+  const id=req.params.id;
+  try{
+    const order=await getOrders(id);
+    res.status(200).json(order);
+  }
+  catch{
+    print("Error Fetching orders!");
+  }
+}
+
+export async function getOrderAPI(req,res) {
+  const id=req.params.id;
+  console.log(id);
+  
+  try{
+    const order=await getOrder(id);
+    res.status(200).json(order);
+  }
+  catch{
+    console.log("Error Fetching order!");
+    res.status(500).json({"msg":"Order doesn't exist!"});
+  }
+
 }
