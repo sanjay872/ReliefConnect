@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import {deleteOrderFromChroma,updateSingleOrderIntoChroma} from "../vector/realtimeOrderSync.js";
 
 const paymentSchema = new mongoose.Schema({
   method: { type: String },
@@ -31,6 +32,21 @@ orderSchema.set("toJSON", {
     delete ret._id;
     delete ret.__v;
   },
+});
+
+// SYNC with Chroma
+orderSchema.post("save",async function(doc){
+    await updateSingleOrderIntoChroma(doc);
+});
+
+
+orderSchema.post("findOneAndUpdate",async function(doc){
+    await updateSingleOrderIntoChroma(doc);
+});
+
+
+orderSchema.post("deleteOne", {document:true, query:false}, async function(doc){
+    await deleteOrderFromChroma(doc._id.toString());
 });
 
 export const Order = mongoose.model("Order", orderSchema);

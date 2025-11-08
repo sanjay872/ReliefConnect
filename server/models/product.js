@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {deleteProductFromChroma,updateSingleProductIntoChroma} from "../vector/realtimeSync.js";
+import {deleteProductFromChroma,updateSingleProductIntoChroma} from "../vector/realtimeProductSync.js";
 
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },

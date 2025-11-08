@@ -35,4 +35,20 @@ export async function getProductCollection() {
   }
 }
 
+export async function getOrderCollection() {
+  try {
+    const collection = await chromaClient.getOrCreateCollection({
+      name: "relief_orders",
+      metadata: { "hnsw:space": "cosine" },
+      embeddingFunction: new NoOpEmbeddingFunction(),    // ✅ Explicitly set distance metric
+    });
+    
+    console.log("Collection metadata:", collection.metadata);
+    return collection;
+  } catch (error) {
+    console.error("Failed to get or create Chroma collection:", error);
+    throw error;
+  }
+}
+
 export default chromaClient;

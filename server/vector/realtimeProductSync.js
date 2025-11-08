@@ -19,7 +19,7 @@ async function embedText(text) {
   }
 }
 
-function toMetadata(product) {
+function toProductMetadata(product) {
   const safeValue = (value) => {
     if (value === undefined || value === null) return null;
     if (typeof value === "object") return JSON.stringify(value); // ✅ serialize objects/arrays
@@ -53,7 +53,7 @@ export async function updateSingleProductIntoChroma(product) {
       ids: [_id.toString()],
       embeddings: [embedding],
       metadatas: [
-        toMetadata(product)
+        toProductMetadata(product)
       ],
       documents: [text],
     });
@@ -64,10 +64,6 @@ export async function updateSingleProductIntoChroma(product) {
   }
 }
 
-/**
- * Delete a product from Chroma by its ID.
- * Called by Mongoose post-deleteOne hook.
- */
 export async function deleteProductFromChroma(productId) {
   try {
     const collection = await getProductCollection();
