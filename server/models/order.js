@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema({
   address: { type: String, required: true },
   phone: { type: String, required: true },
   email: { type: String },
-  status:{type:String, default:"processing"}, // Processing, Shipped, Out-for-Delivery, Delivered, Cancelled, Refunded  
+  status:{type:String, default:"processing"}, // Processing, Shipped, Out-for-Delivery, Delivered, Cancelled, Refunded, in-review
   urgency: { type: String, default: "medium" },
   payment: paymentSchema,
   items: { type: Array, default: [] },
@@ -34,19 +34,19 @@ orderSchema.set("toJSON", {
   },
 });
 
-// SYNC with Chroma
-orderSchema.post("save",async function(doc){
-    await updateSingleOrderIntoChroma(doc);
-});
+// // SYNC with Chroma
+// orderSchema.post("save",async function(doc){
+//     await updateSingleOrderIntoChroma(doc);
+// });
 
 
-orderSchema.post("findOneAndUpdate",async function(doc){
-    await updateSingleOrderIntoChroma(doc);
-});
+// orderSchema.post("findOneAndUpdate",async function(doc){
+//     await updateSingleOrderIntoChroma(doc);
+// });
 
 
-orderSchema.post("deleteOne", {document:true, query:false}, async function(doc){
-    await deleteOrderFromChroma(doc._id.toString());
-});
+// orderSchema.post("deleteOne", {document:true, query:false}, async function(doc){
+//     await deleteOrderFromChroma(doc._id.toString());
+// });
 
 export const Order = mongoose.model("Order", orderSchema);

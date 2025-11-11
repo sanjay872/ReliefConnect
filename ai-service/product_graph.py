@@ -4,11 +4,14 @@ from langgraph.graph import StateGraph, END
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
 from chroma_client import get_chroma_collection
+from services.orders import get_orders_for_user
 
 # Define state
 class GraphState(BaseModel):
+    id: str = ""
     query: str = ""
     intent: str | None = None
+    orders: List[Dict[str, Any]] = Field(default_factory=list)
     products: List[Dict[str, Any]] = Field(default_factory=list)
     response: str | None = None
     history:List[str] = Field(default_factory=list)
@@ -46,6 +49,14 @@ def classify(state: GraphState):
     state.intent = label
     return state
 
+def route_function(state:GraphState):
+    if state.intent=="product":
+        return 'search_products'
+    elif state.intent=="order":
+        return 'search_orders'
+    else:
+        return 'end'
+    
 
 def search_products(state: GraphState):
     if state.intent != "product":
@@ -80,31 +91,63 @@ def search_products(state: GraphState):
     print(f"Filtered products: {len(products)} passed the threshold {threshold}")
     return state
 
+async def fetch_orders(state: GraphState):
+    print("fetching orders")
+    user_id = state.id  # you must add this to GraphState
+    orders = await get_orders_for_user(user_id)
+    print(orders)
+    state.orders = orders
+    return state
+
 def summarize(state: GraphState):
-    """Generate a friendly response using LLM."""
-    if state.intent != "product":
-        state.response = "I can assist with disaster relief products or order inquiries. Please specify your request."
-        return state
-
-    elif not state.products:
-        state.response = "No matching products found."
-        return state
-    else:
+    """Generate response for either product or order requests."""
+    
+    # --- ORDER RESPONSE ---
+    if state.intent == "order":
+        if not state.orders:
+            state.response = "I couldn't find any matching orders. Please provide your order ID or more details."
+            return state
+        
         prompt = f"""
-            Format your answer in clean **Markdown** suitable for chat display.
+        Format the answer in clean **Markdown**.
 
-            For each product:
-            - Include emoji (from its metadata if available)
-            - Name as a bold heading
-            - Use bullet points for Description, Utility, Price, and Availability
-            - End with a one-line helpful note
+        For each order:
+        - Show **Order ID** as a heading
+        - Bullet points for: status, items, delivery location, timestamps
+        - Add a helpful line at the end
 
-            User query: "{state.query}"
-            Products: {state.products}
+        Query: "{state.query}"
+        Orders: {state.orders}
         """
+
         result = llm.invoke(prompt)
         state.response = result.content
+        state.history.append(f"bot:{state.response}")
+        return state
 
+    # --- PRODUCT RESPONSE (existing logic) ---
+    if state.intent != "product":
+        state.response = "I can assist with products or order inquiries. Please clarify your request."
+        return state
+
+    if not state.products:
+        state.response = "No matching products found."
+        return state
+
+    prompt = f"""
+        Format your answer in clean **Markdown** suitable for chat display.
+
+        For each product:
+        - Include emoji (from its metadata if available)
+        - Name as a bold heading
+        - Use bullet points for Description, Utility, Price, and Availability
+        - End with a one-line helpful note
+
+        User query: "{state.query}"
+        Products: {state.products}
+    """
+    result = llm.invoke(prompt)
+    state.response = result.content
     state.history.append(f"bot:{state.response}")
     return state
 
@@ -112,17 +155,24 @@ def summarize(state: GraphState):
 graph = StateGraph(GraphState)
 
 graph.add_node("classify", classify)
-graph.add_node("search", search_products)
+graph.add_node("search_products", search_products)
+graph.add_node("fetch_orders",fetch_orders)
 graph.add_node("summarize", summarize)
 
 graph.set_entry_point("classify")
-graph.add_edge("classify", "search")
-graph.add_edge("search", "summarize")
+graph.add_conditional_edges("classify",
+                            route_function,{
+                                "search_products":"search_products",
+                                "search_orders":"fetch_orders",
+                                "end":END
+                            })
+graph.add_edge("fetch_orders","summarize")
+graph.add_edge("search_products", "summarize")
 graph.add_edge("summarize", END)
 
 compiled_graph = graph.compile()
 
-def run_product_graph(session_id:str,query: str) -> Dict[str, Any]:
+async def run_product_graph(session_id:str,query: str) -> Dict[str, Any]:
     print(session_id,query)
 
     state = session.get(session_id,GraphState(history=[]))
@@ -134,8 +184,9 @@ def run_product_graph(session_id:str,query: str) -> Dict[str, Any]:
 
     context_text = "\n".join(state.history[-6:]) if state.history else ""
     state.query = f"{context_text}\nuser: {query}" if context_text else query
+    state.id=session_id
 
-    new_state=compiled_graph.invoke(state)
+    new_state=await compiled_graph.ainvoke(state)
 
     session[session_id]=new_state
 

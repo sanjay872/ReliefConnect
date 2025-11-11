@@ -16,13 +16,13 @@ app.add_middleware(
 )
 
 @app.post("/recommend")
-def recommend(payload: dict = Body(...)):
+async def recommend(payload: dict = Body(...)):
     session_id=payload.get("session_id","default")
     query = payload.get("query","")
     if not query:
         return {"error": "query is required"}
     print(query)
-    result = run_product_graph(session_id,query)
+    result = await run_product_graph(session_id,query)
     return result
 
 
