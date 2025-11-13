@@ -1,4 +1,6 @@
-import { createNewOrder, getOrders, getOrder, getOrderDetails } from "../services/order.service.js";
+import { createNewOrder, getOrders, getOrder} from "../services/order.service.js";
+import {issueReport} from "../services/ai.service.js";
+
 
 export async function createOrder(req, res) {
   try {
@@ -49,3 +51,39 @@ export async function getOrderAPI(req,res) {
   }
 
 }
+
+export async function issueReportWithAI(req, res) {
+  try {
+    const data = req.body;
+
+    // Validate required fields
+    if (!data.order || !data.order_problem || !data.issue_type) {
+      return res.status(400).json({ msg: "Missing required fields." });
+    }
+
+    const data_to_ai = {
+      order: data.order,
+      order_problem: data.order_problem,
+      issue_type: data.issue_type,
+      image: data.image ? data.image : null  // Base64 string or null
+    };
+
+    console.log("📨 Data going to FastAPI:", data_to_ai);
+
+    // ---- SEND TO FASTAPI ----
+    const axiosResponse = await issueReport(data_to_ai); 
+    // issueReport() = axios call to FastAPI
+
+    res.status(200).json({
+      msg: "Reported!",
+      ai_response: axiosResponse.data
+    });
+
+  } catch (e) {
+    console.error("❌ Error reporting issue:", e.message);
+    res.status(500).json({
+      msg: "Internal server error while reporting issue."
+    });
+  }
+}
+

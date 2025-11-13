@@ -36,11 +36,3 @@ export async function getOrder(orderId){
 export async function updateOrderStatus(orderId,newStatus){
   await Order.updateOne((order)=>order.orderId===orderId,{status:newStatus});
 }
-
-export async function getOrderDetails(){
-  
-}
-
-export async function refundOrder(){
-
-}
