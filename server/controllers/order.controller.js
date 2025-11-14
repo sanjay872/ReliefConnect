@@ -70,13 +70,10 @@ export async function issueReportWithAI(req, res) {
 
     console.log("📨 Data going to FastAPI:", data_to_ai);
 
-    // ---- SEND TO FASTAPI ----
     const axiosResponse = await issueReport(data_to_ai); 
-    // issueReport() = axios call to FastAPI
-
+   
     res.status(200).json({
-      msg: "Reported!",
-      ai_response: axiosResponse.data
+      ...axiosResponse
     });
 
   } catch (e) {

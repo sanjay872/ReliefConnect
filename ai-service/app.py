@@ -3,7 +3,8 @@ from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 from product_graph import run_product_graph
 from langchain_openai import ChatOpenAI
-from models import IssueAI
+from models import OrderIssueRequest, OrderDecisionResponse
+from order_graph import invokeOrderGraph
 
 app = FastAPI(title="ReliefConnect AI Service", version="1.0")
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
@@ -26,16 +27,19 @@ async def recommend(payload: dict = Body(...)):
     result = await run_product_graph(session_id,query)
     return result
 
-@app.post("/report")
-async def report(data:IssueAI):
+@app.post("/report", response_model=OrderDecisionResponse)
+async def report(data:OrderIssueRequest):
     # If image exists, decode it
+    print(data)
     if data.image:
         import base64
         image_bytes = base64.b64decode(data.image)
+        data.image=image_bytes
         # Now you can save it / send to OpenAI / Vision model
-
+    res = invokeOrderGraph(data)
+    print(res)
     # Your AI logic here
-    return {"status": "received", "problem": data.order_problem}
+    return res
 
 @app.post("/summarize")
 def summarize(payload: dict = Body(...)):

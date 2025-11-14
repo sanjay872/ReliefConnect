@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import {createNewTicket} from "../services/ticket.service.js";
 
 const AI_SERVICE_BASE_URL = process.env.AI_SERVICE_BASE_URL || "http://localhost:8001";
 
@@ -27,15 +28,21 @@ export async function issueReport(data_to_ai) {
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(data_to_ai),
     });
-    const data=await response.json();
-  if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error("FastAPI error: " + errorText);
+
+    const data=await response.json(); 
+    console.log(data)
+
+    // create ticket
+    const newTicket={
+      orderId:data_to_ai.order._id,
+      userInput:"",
+      orderProblem:data_to_ai.order_problem,
+      userId:data_to_ai.order.userId,
+      aiResponse:data.polite_message,
+      status:"Open"
     }
-
-    const result = await response.json();
-    return result;
-
+    const ticket=await createNewTicket(newTicket);   
+    return data;
   } catch (err) {
     console.error("❌ Error in issueReport:", err.message);
     throw err;
