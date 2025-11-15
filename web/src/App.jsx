@@ -14,85 +14,110 @@ import AidKits from "./pages/AidKits";
 import OrderPage from "./pages/Order";
 import TrackOrder from "./pages/TrackOrder";
 import ReportFraud from "./pages/ReportFraud";
+import ViewOrders from "./pages/ViewOrders";
+import ViewTickets from "./pages/ViewTickets";
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 import { AppProvider } from "./context/AppContext";
 import { ReliefPackageProvider } from "./context/ReliefPackageContext";
 import { CustomKitsProvider } from "./context/CustomKitsContext";
 import { NotificationProvider } from "./components/Notifications";
 import ReliefPackageBuilder from "./components/ReliefPackageBuilder";
+import ChatFAB from "./components/ChatFAB";
 import Confirmation from "./pages/Confirmation";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import AuthProvider from "./utils/authContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppProvider>
-        <ReliefPackageProvider>
-          <CustomKitsProvider>
-            <NotificationProvider>
-              <AuthProvider>
-                <BrowserRouter>
-                  <Box
-                    sx={{
-                      minHeight: "100vh",
-                      backgroundColor: "#f8fafc",
-                      background:
-                        "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
-                    }}
-                  >
-                    <Navbar />
-                    <Box sx={{ pt: 8 }}>
-                      <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/recommend" element={<Recommend />} />
-                        <Route path="/order" element={<OrderPage />} />
-                        <Route path="/confirmation" element={<Confirmation />} />
-                        <Route path="/information" element={<InformationHub />} />
-                        <Route path="/volunteer" element={<VolunteerPortal />} />
-                        <Route path="/community" element={<CommunityBoard />} />
-                        <Route path="/aid-kits" element={<AidKits />} />
-                        <Route path="/track-order" element={<TrackOrder />} />
-                        <Route path="/report-fraud" element={<ReportFraud />} />
-                        <Route path="/signup" element={<SignUpPage />} />
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route
-                          path="/dashboard"
-                          element={
-                            <Suspense
-                              fallback={
-                                <div style={{ padding: 24 }}>Loading...</div>
-                              }
-                            >
-                              <Dashboard />
-                            </Suspense>
-                          }
-                        />
-                        <Route
-                          path="/dashboard/:orderId"
-                          element={
-                            <Suspense
-                              fallback={
-                                <div style={{ padding: 24 }}>Loading...</div>
-                              }
-                            >
-                              <Dashboard />
-                            </Suspense>
-                          }
-                        />
-                      </Routes>
+      <ErrorBoundary>
+        <AppProvider>
+          <ReliefPackageProvider>
+            <CustomKitsProvider>
+              <NotificationProvider>
+                <AuthProvider>
+                  <BrowserRouter>
+                    <Box
+                      sx={{
+                        minHeight: "100vh",
+                        backgroundColor: "#f8fafc",
+                        background:
+                          "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
+                      }}
+                    >
+                      <Navbar />
+                      <Box sx={{ pt: 8 }}>
+                        <Routes>
+                          <Route path="/" element={<Home />} />
+                          <Route path="/recommend" element={<Recommend />} />
+                          <Route path="/order" element={<OrderPage />} />
+                          <Route
+                            path="/confirmation"
+                            element={<Confirmation />}
+                          />
+                          <Route
+                            path="/information"
+                            element={<InformationHub />}
+                          />
+                          <Route
+                            path="/volunteer"
+                            element={<VolunteerPortal />}
+                          />
+                          <Route
+                            path="/community"
+                            element={<CommunityBoard />}
+                          />
+                          <Route path="/aid-kits" element={<AidKits />} />
+                          <Route path="/track-order" element={<TrackOrder />} />
+                          <Route
+                            path="/report-fraud"
+                            element={<ReportFraud />}
+                          />
+                          <Route path="/orders" element={<ViewOrders />} />
+                          <Route path="/tickets" element={<ViewTickets />} />
+                          <Route path="/signup" element={<SignUpPage />} />
+                          <Route path="/login" element={<LoginPage />} />
+                          <Route
+                            path="/dashboard"
+                            element={
+                              <Suspense
+                                fallback={
+                                  <div style={{ padding: 24 }}>Loading...</div>
+                                }
+                              >
+                                <Dashboard />
+                              </Suspense>
+                            }
+                          />
+                          <Route
+                            path="/dashboard/:orderId"
+                            element={
+                              <Suspense
+                                fallback={
+                                  <div style={{ padding: 24 }}>Loading...</div>
+                                }
+                              >
+                                <Dashboard />
+                              </Suspense>
+                            }
+                          />
+                        </Routes>
+                      </Box>
+                      {/* Global Floating Cart */}
+                      <ReliefPackageBuilder />
+                      {/* Global Chat FAB */}
+                      <ChatFAB />
                     </Box>
-                    {/* Global Floating Cart */}
-                    <ReliefPackageBuilder />
-                  </Box>
-                </BrowserRouter>
-              </AuthProvider>
-            </NotificationProvider>
-          </CustomKitsProvider>
-        </ReliefPackageProvider>
-      </AppProvider>
+                  </BrowserRouter>
+                </AuthProvider>
+              </NotificationProvider>
+            </CustomKitsProvider>
+          </ReliefPackageProvider>
+        </AppProvider>
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }

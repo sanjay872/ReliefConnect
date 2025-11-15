@@ -182,7 +182,6 @@ export default function OrderForm() {
       try {
         res = await createOrder(payload);
       } catch (apiError) {
-        console.log("API unavailable, using offline mode",apiError);
         res = await createOrder(payload, { offline: true });
       }
 
@@ -196,7 +195,6 @@ export default function OrderForm() {
         items: itemsToDisplay, // Complete items with prices and quantities
         isPackage: isPackage,
       };
-      console.log(completeOrderData);
 
       setOrder(completeOrderData); // Keep for context compatibility
 
@@ -208,7 +206,6 @@ export default function OrderForm() {
       // persist username for future visits
       if (!username && data.name) setUsername(data.name);
       show("Order placed successfully", "success");
-      console.log(completeOrderData);
 
       // navigate to confirmation page with complete order data
       navigate("/confirmation", { state: { order: completeOrderData } });
