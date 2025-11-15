@@ -7,9 +7,10 @@ import {
   Typography,
   Box,
   Link,
+  Alert,
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import {signup} from "../services/api";
+import { signup } from "../services/api";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ export default function SignUpPage() {
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,18 +29,35 @@ export default function SignUpPage() {
       ...prev,
       [name]: value,
     }));
+    setError(""); // Clear error when user types
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sign Up Form Data:", formData);
-    const res= await signup({
-      fullname:formData.name,
-      email:formData.email,
-      password:formData.password
-    });
-    console.log(res);
-    navigate("/login");
+    setError("");
+    setSuccess(false);
+    setLoading(true);
+
+    try {
+      const res = await signup({
+        fullname: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Unable to create account. Please check if the backend is running or try again later."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,9 +75,26 @@ export default function SignUpPage() {
         <Typography component="h1" variant="h4" gutterBottom>
           Sign Up
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: "center" }}>
-          Create your ReliefConnect account to access personalized disaster relief services
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 3, textAlign: "center" }}
+        >
+          Create your ReliefConnect account to access personalized disaster
+          relief services
         </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {success && (
+          <Alert severity="success" sx={{ width: "100%", mb: 2 }}>
+            Account created successfully! Redirecting to login...
+          </Alert>
+        )}
 
         <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
           <TextField
@@ -105,6 +143,7 @@ export default function SignUpPage() {
             type="submit"
             fullWidth
             variant="contained"
+            disabled={loading || success}
             sx={{
               mt: 1,
               mb: 2,
@@ -114,7 +153,11 @@ export default function SignUpPage() {
               textTransform: "none",
             }}
           >
-            Sign Up
+            {loading
+              ? "Creating Account..."
+              : success
+              ? "Account Created!"
+              : "Sign Up"}
           </Button>
 
           <Box sx={{ textAlign: "center" }}>

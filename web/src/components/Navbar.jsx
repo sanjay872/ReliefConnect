@@ -24,7 +24,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Alert, Snackbar } from "@mui/material";
-import {useAuth} from "../utils/authContext"
+import { useAuth } from "../utils/authContext";
 import { useEffect } from "react";
 
 export default function Navbar() {
@@ -32,26 +32,27 @@ export default function Navbar() {
   const [markSafeOpen, setMarkSafeOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [isLoggedIn,setIsLoggedIn] = useState(false);
-  const {auth,dispatch}=useAuth(); // Placeholder auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { auth, dispatch } = useAuth(); // Placeholder auth state
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
-  useEffect(()=>{
-    if(auth==null){
+  useEffect(() => {
+    if (auth == null) {
       setIsLoggedIn(false);
-    }
-    else{
+    } else {
       setIsLoggedIn(true);
     }
-  },[auth])
+  }, [auth]);
 
   const menuItems = [
     // { label: "Information Hub", to: "/information", icon: "📚" },
     // { label: "Community Board", to: "/community", icon: "👥" },
     { label: "Aid Kits", to: "/aid-kits", icon: "🛡️" },
     { label: "Get Help", to: "/recommend", icon: "🆘" },
+    { label: "Orders", to: "/orders", icon: "📦" },
+    { label: "Tickets", to: "/tickets", icon: "🎫" },
     // { label: "I Want to Help", to: "/volunteer", icon: "🤝" },
   ];
 
@@ -64,12 +65,11 @@ export default function Navbar() {
     setMarkSafeOpen(false);
   };
 
-  const logout=()=>{
-    console.log("log me out!!")
+  const logout = () => {
     setIsLoggedIn(false);
-    dispatch({type:"LOGOUT"});
+    dispatch({ type: "LOGOUT" });
     navigate("/");
-  }
+  };
 
   return (
     <>
@@ -105,41 +105,40 @@ export default function Navbar() {
           </Box>
 
           {/* Authentication Button */}
-          {
-            isLoggedIn?
-          <Button
-            variant="outlined"
-            onClick={logout}
-            sx={{
-              color: "#fff",
-              borderColor: "rgba(255, 255, 255, 0.5)",
-              mr: 2,
-              "&:hover": {
-                borderColor: "#fff",
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              },
-            }}
-          >
-            Logout
-          </Button>
-          :
-          <Button
-            component={RouterLink}
-            to="/login"
-            variant="outlined"
-            sx={{
-              color: "#fff",
-              borderColor: "rgba(255, 255, 255, 0.5)",
-              mr: 2,
-              "&:hover": {
-                borderColor: "#fff",
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              },
-            }}
-          >
-            Sign In / Sign Up
-          </Button>
-          }
+          {isLoggedIn ? (
+            <Button
+              variant="outlined"
+              onClick={logout}
+              sx={{
+                color: "#fff",
+                borderColor: "rgba(255, 255, 255, 0.5)",
+                mr: 2,
+                "&:hover": {
+                  borderColor: "#fff",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <Button
+              component={RouterLink}
+              to="/login"
+              variant="outlined"
+              sx={{
+                color: "#fff",
+                borderColor: "rgba(255, 255, 255, 0.5)",
+                mr: 2,
+                "&:hover": {
+                  borderColor: "#fff",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              Sign In / Sign Up
+            </Button>
+          )}
 
           {/* Mark Safe Button - Only visible when logged in */}
           {/* {isLoggedIn && (
@@ -161,15 +160,18 @@ export default function Navbar() {
           )} */}
 
           {isMobile ? (
-            isLoggedIn?<IconButton
-              color="inherit"
-              onClick={() => setOpen(true)}
-              aria-label="open menu"
-            >
-              <MenuIcon />
-            </IconButton>:<></>
-          ) : (
-            isLoggedIn?
+            isLoggedIn ? (
+              <IconButton
+                color="inherit"
+                onClick={() => setOpen(true)}
+                aria-label="open menu"
+              >
+                <MenuIcon />
+              </IconButton>
+            ) : (
+              <></>
+            )
+          ) : isLoggedIn ? (
             <Box sx={{ display: "flex", gap: 1 }}>
               {menuItems.map((m) => (
                 <Button
@@ -188,7 +190,7 @@ export default function Navbar() {
                 </Button>
               ))}
             </Box>
-            :
+          ) : (
             <></>
           )}
         </Toolbar>
@@ -218,28 +220,25 @@ export default function Navbar() {
 
             {/* Authentication Link for Mobile */}
             <ListItem disablePadding>
-              {
-                isLoggedIn?
+              {isLoggedIn ? (
+                <ListItemButton onClick={logout}>
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <span style={{ fontSize: "1.2rem" }}>🔐</span>
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </ListItemButton>
+              ) : (
                 <ListItemButton
-                onClick={logout}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <span style={{ fontSize: "1.2rem" }}>🔐</span>
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
-              </ListItemButton>
-              :
-              <ListItemButton
-                component={RouterLink}
-                to="/login"
-                onClick={() => setOpen(false)}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <span style={{ fontSize: "1.2rem" }}>🔐</span>
-                </ListItemIcon>
-                <ListItemText primary="Sign In / Sign Up" />
-              </ListItemButton>
-              }
+                  component={RouterLink}
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <span style={{ fontSize: "1.2rem" }}>🔐</span>
+                  </ListItemIcon>
+                  <ListItemText primary="Sign In / Sign Up" />
+                </ListItemButton>
+              )}
             </ListItem>
 
             {/* Mark Safe Link for Mobile - Only visible when logged in */}

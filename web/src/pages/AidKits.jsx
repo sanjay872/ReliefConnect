@@ -8,6 +8,8 @@ import {
   Button,
   Tabs,
   Tab,
+  CircularProgress,
+  Alert,
   // useTheme,
   // useMediaQuery,
 } from "@mui/material";
@@ -23,7 +25,7 @@ import { searchProduct } from "../services/api";
 export default function AidKits() {
   const [mainCategory, setMainCategory] = useState("urgent");
   const [selectedSubCategory, setSelectedSubCategory] = useState("All");
-  const [kits,setKits]=useState([]);
+  const [kits, setKits] = useState([]);
   // const theme = useTheme();
   // const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -48,20 +50,38 @@ export default function AidKits() {
     setSelectedSubCategory(category);
   };
 
-  async function getKits(){
-    const data={
-      page:1,
-      size:100,
-      category:selectedSubCategory,
-      priority:mainCategory
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  async function getKits() {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = {
+        page: 1,
+        size: 100,
+        category: selectedSubCategory,
+        priority: mainCategory,
+      };
+      // Use offline mode for frontend development
+      const res = await searchProduct(data, { offline: true });
+      if (res && res.data && res.data.result && res.data.result.products) {
+        setKits(res.data.result.products);
+      } else {
+        setKits([]);
+      }
+    } catch (err) {
+      console.error("Error fetching kits:", err);
+      setError("Failed to load aid kits. Please try again.");
+      setKits([]);
+    } finally {
+      setLoading(false);
     }
-    const res=await searchProduct(data);
-    setKits(res.data.result.products);
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     getKits();
-  },[mainCategory,selectedSubCategory])
+  }, [mainCategory, selectedSubCategory]);
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -99,138 +119,157 @@ export default function AidKits() {
         </Typography>
       </Box>
 
-      {
-        kits.length!==0?
-       <>
-         {/* Main Category Tabs */}
-      <Box sx={{ mb: 4 }}>
-        <Tabs
-          value={mainCategory}
-          onChange={handleMainCategoryChange}
-          centered
-          sx={{
-            mb: 3,
-            "& .MuiTab-root": {
-              fontSize: "1.1rem",
-              fontWeight: 600,
-              textTransform: "none",
-              minHeight: 48,
-            },
-          }}
-        >
-          <Tab
-            label={mainCategories.urgent}
-            value="urgent"
-            sx={{
-              color:
-                mainCategory === "urgent" ? "error.main" : "text.secondary",
-              "&.Mui-selected": {
-                color: "error.main",
-              },
-            }}
-          />
-          <Tab
-            label={mainCategories.preparedness}
-            value="preparedness"
-            sx={{
-              color:
-                mainCategory === "preparedness"
-                  ? "primary.main"
-                  : "text.secondary",
-              "&.Mui-selected": {
-                color: "primary.main",
-              },
-            }}
-          />
-        </Tabs>
+      {/* Loading State */}
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      )}
 
-        {/* Sub-Category Filter Buttons */}
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 1,
-            justifyContent: "center",
-            mb: 2,
-          }}
-        >
-          {currentSubCategories.map((category) => (
-            <Chip
-              key={category}
-              label={category}
-              onClick={() => handleSubCategoryChange(category)}
-              variant={selectedSubCategory === category ? "filled" : "outlined"}
-              color={selectedSubCategory === category ? "primary" : "default"}
+      {/* Error State */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Main Content */}
+      {!loading && !error && (
+        <>
+          {/* Main Category Tabs */}
+          <Box sx={{ mb: 4 }}>
+            <Tabs
+              value={mainCategory}
+              onChange={handleMainCategoryChange}
+              centered
               sx={{
-                fontWeight: selectedSubCategory === category ? 600 : 400,
-                transition: "all 0.2s ease-in-out",
-                "&:hover": {
-                  backgroundColor:
-                    selectedSubCategory === category
-                      ? "primary.dark"
-                      : "primary.light",
-                  color: "white",
+                mb: 3,
+                "& .MuiTab-root": {
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  minHeight: 48,
                 },
               }}
-            />
-          ))}
-        </Box>
+            >
+              <Tab
+                label={mainCategories.urgent}
+                value="urgent"
+                sx={{
+                  color:
+                    mainCategory === "urgent" ? "error.main" : "text.secondary",
+                  "&.Mui-selected": {
+                    color: "error.main",
+                  },
+                }}
+              />
+              <Tab
+                label={mainCategories.preparedness}
+                value="preparedness"
+                sx={{
+                  color:
+                    mainCategory === "preparedness"
+                      ? "primary.main"
+                      : "text.secondary",
+                  "&.Mui-selected": {
+                    color: "primary.main",
+                  },
+                }}
+              />
+            </Tabs>
 
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ textAlign: "center", mb: 3 }}
-        >
-          Showing {kits.length} kit
-          {kits.length !== 1 ? "s" : ""}
-          {selectedSubCategory !== "All" && ` in ${selectedSubCategory}`}
-        </Typography>
-      </Box>
+            {/* Sub-Category Filter Buttons */}
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1,
+                justifyContent: "center",
+                mb: 2,
+              }}
+            >
+              {currentSubCategories.map((category) => (
+                <Chip
+                  key={category}
+                  label={category}
+                  onClick={() => handleSubCategoryChange(category)}
+                  variant={
+                    selectedSubCategory === category ? "filled" : "outlined"
+                  }
+                  color={
+                    selectedSubCategory === category ? "primary" : "default"
+                  }
+                  sx={{
+                    fontWeight: selectedSubCategory === category ? 600 : 400,
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": {
+                      backgroundColor:
+                        selectedSubCategory === category
+                          ? "primary.dark"
+                          : "primary.light",
+                      color: "white",
+                    },
+                  }}
+                />
+              ))}
+            </Box>
 
-      <Grid container spacing={3}>
-        {kits.map((kit) => (
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
-            key={kit.id || kit.name}
-            sx={{ display: "flex", flexDirection: "column" }}
-          >
-            <KitCard kit={kit} />
-          </Grid>
-        ))}
-      </Grid>
-       </>
-       :
-       <>
-        <Box
-          sx={{
-            textAlign: "center",
-            py: 8,
-            backgroundColor: "grey.50",
-            borderRadius: 2,
-            border: "2px dashed",
-            borderColor: "grey.300",
-          }}
-        >
-          <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
-            No kits found in this category
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Try selecting a different category to browse our available kits.
-          </Typography>
-          <Button
-            variant="outlined"
-            onClick={() => setSelectedSubCategory("All")}
-            sx={{ px: 4 }}
-          >
-            View All Kits
-          </Button>
-        </Box>
-       </>
-      }
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "center", mb: 3 }}
+            >
+              Showing {kits.length} kit
+              {kits.length !== 1 ? "s" : ""}
+              {selectedSubCategory !== "All" && ` in ${selectedSubCategory}`}
+            </Typography>
+          </Box>
+
+          {/* Kits Grid or Empty State */}
+          {kits.length !== 0 ? (
+            <Grid container spacing={3}>
+              {kits.map((kit) => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  lg={3}
+                  key={kit.id || kit.name}
+                  sx={{ display: "flex", flexDirection: "column" }}
+                >
+                  <KitCard kit={kit} />
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box
+              sx={{
+                textAlign: "center",
+                py: 8,
+                backgroundColor: "grey.50",
+                borderRadius: 2,
+                border: "2px dashed",
+                borderColor: "grey.300",
+              }}
+            >
+              <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
+                No kits found in this category
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                Try selecting a different category to browse our available kits.
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => setSelectedSubCategory("All")}
+                sx={{ px: 4 }}
+              >
+                View All Kits
+              </Button>
+            </Box>
+          )}
+        </>
+      )}
     </Container>
   );
 }
