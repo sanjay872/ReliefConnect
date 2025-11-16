@@ -64,7 +64,7 @@ export default function AidKits() {
         priority: mainCategory,
       };
       // Use offline mode for frontend development
-      const res = await searchProduct(data, { offline: true });
+      const res = await searchProduct(data, { offline:false });
       if (res && res.data && res.data.result && res.data.result.products) {
         setKits(res.data.result.products);
       } else {

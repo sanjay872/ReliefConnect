@@ -155,7 +155,7 @@ export default function LoginPage() {
 
           <Divider sx={{ my: 2 }}>OR</Divider>
 
-          <Button
+          {/* <Button
             fullWidth
             variant="outlined"
             onClick={handleDemoLogin}
@@ -168,7 +168,7 @@ export default function LoginPage() {
             }}
           >
             Demo Login (Test Features)
-          </Button>
+          </Button> */}
 
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="body2" color="text.secondary">

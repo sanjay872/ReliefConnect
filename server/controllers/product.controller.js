@@ -13,8 +13,8 @@ export async function createProduct(req,res){
 
 export async function getRecommendedProducts(req, res) {
   try {
-    const { query } = req.body;
-    const aiResult = await recommendProducts(query);
+    const { userId, query } = req.body;
+    const aiResult = await recommendProducts(query,userId);
 
     res.json({
       success: true,

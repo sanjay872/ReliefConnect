@@ -215,3 +215,11 @@ a:focus {
     color: #000000;
   }
 }
+
+.view-order-item-tags{
+  box-shadow: .5em .5em .7em gray;
+  padding: .1em;
+  margin: 1em;
+  font-weight: 500;
+  width: fit-content;
+}

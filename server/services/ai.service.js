@@ -3,13 +3,13 @@ import {createNewTicket} from "../services/ticket.service.js";
 
 const AI_SERVICE_BASE_URL = process.env.AI_SERVICE_BASE_URL || "http://localhost:8001";
 
-export async function recommendProducts(query) {
+export async function recommendProducts(query,userId) {
     console.log(query)
   try {
     const response = await fetch(AI_SERVICE_BASE_URL+"/recommend", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({"query":query}),
+      body: JSON.stringify({"query":query,"session_id":userId}),
     });
     const data = await response.json();
     console.log(data)

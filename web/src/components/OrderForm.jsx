@@ -1,36 +1,11 @@
 import React, { useEffect, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { createOrder } from "../services/api";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  IconButton,
-  Tooltip,
-  Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Divider,
-  Grid,
-} from "@mui/material";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import MyLocationIcon from "@mui/icons-material/MyLocation";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import OrderSummary from "./OrderSummary";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { useReliefPackage } from "../context/ReliefPackageContext";
 import { NotificationContext } from "./Notifications";
+import { useAuth } from "../utils/authContext";
 
 export default function OrderForm() {
   const { state } = useLocation();
@@ -40,7 +15,6 @@ export default function OrderForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     setValue,
-    watch,
   } = useForm({
     defaultValues: {
       urgency: "medium", // Set default urgency to prevent undefined value
@@ -57,15 +31,7 @@ export default function OrderForm() {
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState(null);
   const [currentAddress, setCurrentAddress] = useState("");
-  const [showOrderSummary, setShowOrderSummary] = useState(false);
-
-  // Watch form fields for order summary
-  const addressValue = watch("address");
-  const nameValue = watch("name");
-  const phoneValue = watch("phone");
-  const emailValue = watch("email");
-  const urgencyValue = watch("urgency");
-  const itemsValue = watch("items");
+  const auth=useAuth();
 
   // Determine if this is a package order or single item
   const selectedResources = state?.selectedResources || [];
@@ -112,7 +78,7 @@ export default function OrderForm() {
           }
           show("Location detected and address filled automatically", "success");
         } catch (error) {
-          setLocationError("Failed to get address from location.");
+          setLocationError("Failed to get address from location.",error);
           setLocationLoading(false);
         }
       },
@@ -163,12 +129,23 @@ export default function OrderForm() {
   const onSubmit = async (data) => {
     try {
       const payload = {
+        userId:auth.auth.userid,
         name: data.name,
         address: data.address,
         phone: data.phone,
         email: data.email || "",
         urgency: data.urgency || "medium",
         payment: {
+          method:"card",
+          transactionId:Math.random().toString(36).substr(2, 9),
+          amount:itemsToDisplay.reduce(
+                                (sum, item) =>
+                                  sum +
+                                  (item.price || 0) * (item.quantity || 1),
+                                0
+                              ),
+          currency:"USD",
+          paid:true,
           cardLast4: data.cardNumber ? data.cardNumber.slice(-4) : "1234",
           type: "demo-card",
         },
@@ -182,6 +159,7 @@ export default function OrderForm() {
       try {
         res = await createOrder(payload);
       } catch (apiError) {
+        console.log("API unavailable, using offline mode",apiError);
         res = await createOrder(payload, { offline: true });
       }
 
@@ -195,6 +173,7 @@ export default function OrderForm() {
         items: itemsToDisplay, // Complete items with prices and quantities
         isPackage: isPackage,
       };
+      console.log(completeOrderData);
 
       setOrder(completeOrderData); // Keep for context compatibility
 
@@ -206,6 +185,7 @@ export default function OrderForm() {
       // persist username for future visits
       if (!username && data.name) setUsername(data.name);
       show("Order placed successfully", "success");
+      console.log(completeOrderData);
 
       // navigate to confirmation page with complete order data
       navigate("/confirmation", { state: { order: completeOrderData } });
@@ -216,38 +196,38 @@ export default function OrderForm() {
     }
   };
 
-  const handleOrderRetry = async () => {
-    // Re-attempt placing the order using the last filled form values
-    const items = (document.querySelector('textarea[name="items"]') || {})
-      .value;
-    const name = (document.querySelector('input[name="name"]') || {}).value;
-    const address = (document.querySelector('textarea[name="address"]') || {})
-      .value;
-    const payload = { name, address, payment: "demo-card", items };
-    if (liveRef.current)
-      liveRef.current.textContent = "Retrying order submission";
-    try {
-      const res = await createOrder(payload, { offline: offlineMode });
+  // const handleOrderRetry = async () => {
+  //   // Re-attempt placing the order using the last filled form values
+  //   const items = (document.querySelector('textarea[name="items"]') || {})
+  //     .value;
+  //   const name = (document.querySelector('input[name="name"]') || {}).value;
+  //   const address = (document.querySelector('textarea[name="address"]') || {})
+  //     .value;
+  //   const payload = { name, address, payment: "demo-card", items };
+  //   if (liveRef.current)
+  //     liveRef.current.textContent = "Retrying order submission";
+  //   try {
+  //     const res = await createOrder(payload, { offline: offlineMode });
 
-      const completeOrderData = {
-        ...res,
-        name,
-        address,
-        items: itemsToDisplay,
-        isPackage: isPackage,
-      };
+  //     const completeOrderData = {
+  //       ...res,
+  //       name,
+  //       address,
+  //       items: itemsToDisplay,
+  //       isPackage: isPackage,
+  //     };
 
-      setOrder(completeOrderData);
-      if (!username && name) setUsername(name);
-      show("Order placed successfully", "success");
-      navigate("/confirmation", { state: { order: completeOrderData } });
-    } catch (err) {
-      if (liveRef.current)
-        liveRef.current.textContent = "Still offline — order not sent";
-      const msg = err?.response?.data?.message || err.message || "Order failed";
-      show(msg, "error");
-    }
-  };
+  //     setOrder(completeOrderData);
+  //     if (!username && name) setUsername(name);
+  //     show("Order placed successfully", "success");
+  //     navigate("/confirmation", { state: { order: completeOrderData } });
+  //   } catch (err) {
+  //     if (liveRef.current)
+  //       liveRef.current.textContent = "Still offline — order not sent";
+  //     const msg = err?.response?.data?.message || err.message || "Order failed";
+  //     show(msg, "error");
+  //   }
+  // };
 
   return (
     <Box sx={{ maxWidth: "100%", mx: "auto" }}>
@@ -371,7 +351,7 @@ export default function OrderForm() {
                     {...register("phone", {
                       required: "Phone number is required",
                       pattern: {
-                        value: /^[\+]?[1-9][\d]{0,15}$/,
+                        value: /^[\\+]?[1-9][\d]{0,15}$/,
                         message: "Please enter a valid phone number",
                       },
                     })}

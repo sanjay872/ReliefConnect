@@ -22,7 +22,7 @@ import { ReliefPackageProvider } from "./context/ReliefPackageContext";
 import { CustomKitsProvider } from "./context/CustomKitsContext";
 import { NotificationProvider } from "./components/Notifications";
 import ReliefPackageBuilder from "./components/ReliefPackageBuilder";
-import ChatFAB from "./components/ChatFAB";
+// import ChatFAB from "./components/ChatFAB";
 import Confirmation from "./pages/Confirmation";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
@@ -109,7 +109,7 @@ function App() {
                       {/* Global Floating Cart */}
                       <ReliefPackageBuilder />
                       {/* Global Chat FAB */}
-                      <ChatFAB />
+                      {/* <ChatFAB /> */}
                     </Box>
                   </BrowserRouter>
                 </AuthProvider>

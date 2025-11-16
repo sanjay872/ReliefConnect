@@ -80,7 +80,7 @@ export default function ViewOrders() {
   const [submittingIssue, setSubmittingIssue] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { auth } = useAuth();
+  const {auth}=useAuth();
 
   // TODO: Integrate with backend - Fetch orders from API
   // Replace this useEffect with actual API call when backend is ready
@@ -96,8 +96,8 @@ export default function ViewOrders() {
         // setOrders(response.orders || []);
 
         // Using mock data for now - remove when backend is ready
-        const response = await getOrders({ offline: true });
-        setOrders(response.orders || []);
+        const response = await getOrders(auth.userid,{ offline: false });
+        setOrders(response|| []);
       } catch (err) {
         console.error("Error fetching orders:", err);
         setError(err.message || "Failed to load orders");
@@ -221,16 +221,32 @@ export default function ViewOrders() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Delivered":
+      case "delivered":
         return "success";
-      case "In Transit":
+      case "in-transit":
         return "info";
-      case "Processing":
+      case "processing":
         return "warning";
       default:
         return "default";
     }
   };
+
+  
+  function timeAgo(date) {
+  const diff = (Date.now() - new Date(date)) / 1000;
+
+  if (diff < 60) return `${Math.floor(diff)} sec ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)} hrs ago`;
+  
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
 
   // Mobile card view
   const OrderCard = ({ order }) => (
@@ -247,13 +263,13 @@ export default function ViewOrders() {
           />
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Date: {order.date}
+          Date: {timeAgo(order.timestamp)}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Items: {order.items.join(", ")}
+          Items: {order.items.map((item)=><div className="view-order-item-tags" id={item.id}>{item.name}</div>)}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Total: {order.total}
+          Total: {order.payment.amount}
         </Typography>
         <Button
           variant="outlined"
@@ -380,16 +396,16 @@ export default function ViewOrders() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">{order.date}</Typography>
+                      <Typography variant="body2">{timeAgo(order.timestamp)}</Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {order.items.join(", ")}
+                        {order.items.map((item)=><div className="view-order-item-tags">{item.name}</div>)}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {order.total}
+                        ${order.payment.amount}
                       </Typography>
                     </TableCell>
                     <TableCell>

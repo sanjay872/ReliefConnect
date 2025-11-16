@@ -98,7 +98,7 @@ export default function ViewTickets() {
             sortField,
             sortDirection,
           },
-          { offline: true }
+          { offline: false }
         );
         setTickets(response.tickets || []);
       } catch (err) {

@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { NotificationContext } from "./Notifications";
+import { useAuth } from "../utils/authContext";
 
 export default function RecommendationForm() {
   const [needs, setNeeds] = useState("");
@@ -22,14 +23,16 @@ export default function RecommendationForm() {
   const navigate = useNavigate();
   const { setRecommendation } = useContext(AppContext);
   const { show } = useContext(NotificationContext);
+  const {auth}=useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setRecommendationLocal(null);
     setLoading(true);
+    console.log(auth);
     try {
-      const data = await recommend(needs);
+      const data = await recommend(needs,auth.userid);
       setRecommendationLocal(data.products);
       setRecommendation(data.products);
       show("Recommendations received", "success");
