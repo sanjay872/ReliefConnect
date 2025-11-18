@@ -175,101 +175,97 @@ export const getOrders = async (userid,options = {}) => {
   return res.data;
 };
 
-export const getTickets = async (filters = {}, options = {}) => {
-  const { offline = false } = options;
-  const { status, sortField, sortDirection } = filters;
+export const getTickets = async (userId) => {
+  // const { offline = false } = options;
+  // const { status, sortField, sortDirection } = filters;
 
-  if (offline) {
-    // Mock data for testing - remove when backend is ready
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+  // if (offline) {
+  //   // Mock data for testing - remove when backend is ready
+  //   // Simulate API delay
+  //   await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const mockTickets = [
-      {
-        id: "TICK-001",
-        orderId: "ORD-001",
-        issueType: "Delivery Delay",
-        status: "Open",
-        createdDate: "2024-01-15",
-        description: "Order has not been delivered after 5 days",
-      },
-      {
-        id: "TICK-002",
-        orderId: "ORD-002",
-        issueType: "Product Defect",
-        status: "In Progress",
-        createdDate: "2024-01-16",
-        description: "Received damaged items in the package",
-      },
-      {
-        id: "TICK-003",
-        orderId: "ORD-003",
-        issueType: "Payment Issue",
-        status: "Resolved",
-        createdDate: "2024-01-17",
-        description: "Charged twice for the same order",
-      },
-      {
-        id: "TICK-004",
-        orderId: "ORD-004",
-        issueType: "Other",
-        status: "Open",
-        createdDate: "2024-01-18",
-        description: "Need to update delivery address",
-      },
-      {
-        id: "TICK-005",
-        orderId: "ORD-005",
-        issueType: "Delivery Delay",
-        status: "In Progress",
-        createdDate: "2024-01-19",
-        description: "Order delayed due to weather conditions",
-      },
-    ];
+  //   const mockTickets = [
+  //     {
+  //       id: "TICK-001",
+  //       orderId: "ORD-001",
+  //       issueType: "Delivery Delay",
+  //       status: "Open",
+  //       createdDate: "2024-01-15",
+  //       description: "Order has not been delivered after 5 days",
+  //     },
+  //     {
+  //       id: "TICK-002",
+  //       orderId: "ORD-002",
+  //       issueType: "Product Defect",
+  //       status: "In Progress",
+  //       createdDate: "2024-01-16",
+  //       description: "Received damaged items in the package",
+  //     },
+  //     {
+  //       id: "TICK-003",
+  //       orderId: "ORD-003",
+  //       issueType: "Payment Issue",
+  //       status: "Resolved",
+  //       createdDate: "2024-01-17",
+  //       description: "Charged twice for the same order",
+  //     },
+  //     {
+  //       id: "TICK-004",
+  //       orderId: "ORD-004",
+  //       issueType: "Other",
+  //       status: "Open",
+  //       createdDate: "2024-01-18",
+  //       description: "Need to update delivery address",
+  //     },
+  //     {
+  //       id: "TICK-005",
+  //       orderId: "ORD-005",
+  //       issueType: "Delivery Delay",
+  //       status: "In Progress",
+  //       createdDate: "2024-01-19",
+  //       description: "Order delayed due to weather conditions",
+  //     },
+  //   ];
 
-    // Apply client-side filtering for mock data (backend will handle this)
-    let filtered = mockTickets;
-    if (status && status !== "All") {
-      filtered = filtered.filter((ticket) => ticket.status === status);
-    }
+  //   // Apply client-side filtering for mock data (backend will handle this)
+  //   let filtered = mockTickets;
+  //   if (status && status !== "All") {
+  //     filtered = filtered.filter((ticket) => ticket.status === status);
+  //   }
 
-    // Apply client-side sorting for mock data (backend will handle this)
-    const sorted = [...filtered].sort((a, b) => {
-      let aValue = a[sortField || "createdDate"];
-      let bValue = b[sortField || "createdDate"];
+  //   // Apply client-side sorting for mock data (backend will handle this)
+  //   const sorted = [...filtered].sort((a, b) => {
+  //     let aValue = a[sortField || "createdDate"];
+  //     let bValue = b[sortField || "createdDate"];
 
-      if (sortField === "createdDate") {
-        aValue = new Date(aValue);
-        bValue = new Date(bValue);
-      } else {
-        aValue = String(aValue).toLowerCase();
-        bValue = String(bValue).toLowerCase();
-      }
+  //     if (sortField === "createdDate") {
+  //       aValue = new Date(aValue);
+  //       bValue = new Date(bValue);
+  //     } else {
+  //       aValue = String(aValue).toLowerCase();
+  //       bValue = String(bValue).toLowerCase();
+  //     }
 
-      if ((sortDirection || "desc") === "asc") {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
+  //     if ((sortDirection || "desc") === "asc") {
+  //       return aValue > bValue ? 1 : -1;
+  //     } else {
+  //       return aValue < bValue ? 1 : -1;
+  //     }
+  //   });
 
-    return { tickets: sorted };
-  }
+  //   return { tickets: sorted };
+  // }
 
   // TODO: Replace with actual API call
   // const params = new URLSearchParams();
   // if (status && status !== "All") params.append("status", status);
   // if (sortField) params.append("sort", sortField);
   // if (sortDirection) params.append("direction", sortDirection);
-  //
-  // const res = await api.get(`/api/tickets?${params.toString()}`, {
-  //   headers: {
-  //     Authorization: `Bearer ${getAuthToken()}`,
-  //   },
-  // });
-  // return res.data;
-
-  throw new Error("Backend integration pending - use offline mode for testing");
+  
+  const res = await api.get(`/api/ticket/${userId}`);
+  console.log(res.data.tickets)
+  return res.data.tickets
+  //throw new Error("Backend integration pending - use offline mode for testing");
 };
 
 export default api;

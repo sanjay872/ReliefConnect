@@ -266,7 +266,7 @@ export default function ViewOrders() {
           Date: {timeAgo(order.timestamp)}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Items: {order.items.map((item)=><div className="view-order-item-tags" id={item.id}>{item.name}</div>)}
+          Items: {order.items.map((item)=><div className="view-order-item-tags" key={item.id}>{item.name}</div>)}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           Total: {order.payment.amount}
@@ -400,7 +400,7 @@ export default function ViewOrders() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {order.items.map((item)=><div className="view-order-item-tags">{item.name}</div>)}
+                        {order.items.map((item)=><div className="view-order-item-tags" key={item.id}>{item.name}</div>)}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -509,16 +509,16 @@ export default function ViewOrders() {
                         {selectedOrder.id}
                       </Typography>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={6} sx={{ml:0.5}}>
                       <Typography
                         variant="body2"
                         color="text.secondary"
-                        sx={{ mb: 0.5 }}
+                        sx={{ mb: 0.5}}
                       >
                         Date
                       </Typography>
                       <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {selectedOrder.date}
+                        {timeAgo(selectedOrder.timestamp)}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
@@ -530,7 +530,7 @@ export default function ViewOrders() {
                         Total
                       </Typography>
                       <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {selectedOrder.total}
+                        ${selectedOrder.payment.amount}
                       </Typography>
                     </Grid>
                   </Grid>

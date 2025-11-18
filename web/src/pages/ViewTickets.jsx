@@ -79,48 +79,44 @@ export default function ViewTickets() {
       setLoading(true);
       setError("");
 
-      try {
-        // TODO: Replace with actual API call when backend is ready
-        // const response = await getTickets(
-        //   {
-        //     status: statusFilter !== "All" ? statusFilter : undefined,
-        //     sortField,
-        //     sortDirection,
-        //   },
-        //   { offline: false }
-        // );
-        // setTickets(response.tickets || []);
-
-        // Using mock data for now - remove when backend is ready
-        const response = await getTickets(
-          {
-            status: statusFilter,
-            sortField,
-            sortDirection,
-          },
-          { offline: false }
-        );
-        setTickets(response.tickets || []);
-      } catch (err) {
-        console.error("Error fetching tickets:", err);
-        setError(err.message || "Failed to load tickets");
-        setSnackbarMessage(err.message || "Failed to load tickets");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-        // Fallback to mock data on error for testing
-        setTickets(mockTickets);
-      } finally {
+      // try {
+        //TODO: Replace with actual API call when backend is ready
+        const response = await getTickets(auth.userid);
+        console.log("tickets:")
+        console.log(response);
+        setTickets(response);
         setLoading(false);
-      }
-    };
+        // Using mock data for now - remove when backend is ready
+    //     const response = await getTickets(
+    //       {
+    //         status: statusFilter,
+    //         sortField,
+    //         sortDirection,
+    //       },
+    //       { offline: false }
+    //     );
+    //     setTickets(response.tickets || []);
+    //   } catch (err) {
+    //     console.error("Error fetching tickets:", err);
+    //     setError(err.message || "Failed to load tickets");
+    //     setSnackbarMessage(err.message || "Failed to load tickets");
+    //     setSnackbarSeverity("error");
+    //     setSnackbarOpen(true);
+    //     // Fallback to mock data on error for testing
+    //     setTickets(mockTickets);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
 
     // Debounce filter changes (optional - remove if backend handles efficiently)
     // Note: Remove debounce when using real API, backend should handle efficiently
-    const timeoutId = setTimeout(() => {
-      fetchTickets();
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
+    // const timeoutId = setTimeout(() => {
+    //   fetchTickets();
+    // }, 300);
+    }
+    fetchTickets();
+    // return () => clearTimeout(timeoutId);
   }, [statusFilter, sortField, sortDirection]);
 
   // TODO: Update URL params when filters change (for shareable state)
@@ -232,6 +228,34 @@ export default function ViewTickets() {
     </Card>
   );
 
+   
+  function timeAgo(date) {
+  const diff = (Date.now() - new Date(date)) / 1000;
+
+  if (diff < 60) return `${Math.floor(diff)} sec ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)} hrs ago`;
+  
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+function makeDescription(ticket){
+  return <div>
+      <div>
+        <div>User Input:</div>
+        <div>{ticket.orderProblem}</div>
+      </div>
+      <div>
+        <div>AI Response:</div>
+        <div>{ticket.aiResponse}</div>
+      </div>
+    </div>;
+}
+
   // Mobile card view
   const TicketCard = ({ ticket }) => (
     <Card sx={{ mb: 2 }}>
@@ -246,7 +270,7 @@ export default function ViewTickets() {
         >
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-              {ticket.id}
+              {ticket._id}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Order: {ticket.orderId}
@@ -266,13 +290,13 @@ export default function ViewTickets() {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
             Created Date
           </Typography>
-          <Typography variant="body1">{ticket.createdDate}</Typography>
+          <Typography variant="body1">{timeAgo(ticket.timestamp)}</Typography>
         </Box>
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
             Description
           </Typography>
-          <Typography variant="body2">{ticket.description}</Typography>
+          <Typography variant="body2">{makeDescription(ticket)}</Typography>
         </Box>
       </CardContent>
     </Card>
@@ -290,7 +314,7 @@ export default function ViewTickets() {
       </Box>
 
       {/* Filter Section */}
-      <Box sx={{ mb: 3, display: "flex", gap: 2, alignItems: "center" }}>
+      {/* <Box sx={{ mb: 3, display: "flex", gap: 2, alignItems: "center" }}>
         <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel>Filter by Status</InputLabel>
           <Select
@@ -307,7 +331,7 @@ export default function ViewTickets() {
             <MenuItem value="Resolved">Resolved</MenuItem>
           </Select>
         </FormControl>
-      </Box>
+      </Box> */}
 
       {/* Loading State */}
       {loading ? (
@@ -329,25 +353,23 @@ export default function ViewTickets() {
             </Box>
           </CardContent>
         </Card>
-      ) : error && tickets.length === 0 ? (
+      ) : tickets.length === 0 ? (
         // Error State (only show if no tickets loaded)
         <Card>
           <CardContent>
-            <Alert severity="error">
+            <Alert severity="success">
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Error Loading Tickets
+                No Tickets Found
               </Typography>
               <Typography variant="body2">{error}</Typography>
             </Alert>
           </CardContent>
         </Card>
-      ) : filteredAndSortedTickets.length === 0 ? (
-        <EmptyState />
-      ) : isMobile ? (
+      ) :  isMobile ? (
         // Mobile card view
         <Box>
-          {filteredAndSortedTickets.map((ticket) => (
-            <TicketCard key={ticket.id} ticket={ticket} />
+          {tickets.map((ticket) => (
+            <TicketCard key={ticket._id} ticket={ticket} />
           ))}
         </Box>
       ) : (
@@ -359,9 +381,9 @@ export default function ViewTickets() {
                 <TableRow sx={{ backgroundColor: "grey.50" }}>
                   <TableCell sx={{ fontWeight: 600 }}>
                     <TableSortLabel
-                      active={sortField === "id"}
-                      direction={sortField === "id" ? sortDirection : "asc"}
-                      onClick={() => handleSort("id")}
+                      // active={sortField === "id"}
+                      // direction={sortField === "id" ? sortDirection : "asc"}
+                      // onClick={() => handleSort("id")}
                     >
                       Ticket ID
                     </TableSortLabel>
@@ -370,20 +392,20 @@ export default function ViewTickets() {
                   <TableCell sx={{ fontWeight: 600 }}>Issue Type</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>
                     <TableSortLabel
-                      active={sortField === "status"}
-                      direction={sortField === "status" ? sortDirection : "asc"}
-                      onClick={() => handleSort("status")}
+                      // active={sortField === "status"}
+                      // direction={sortField === "status" ? sortDirection : "asc"}
+                      // onClick={() => handleSort("status")}
                     >
                       Status
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>
                     <TableSortLabel
-                      active={sortField === "createdDate"}
-                      direction={
-                        sortField === "createdDate" ? sortDirection : "asc"
-                      }
-                      onClick={() => handleSort("createdDate")}
+                      // active={sortField === "createdDate"}
+                      // direction={
+                      //   sortField === "createdDate" ? sortDirection : "asc"
+                      // }
+                      // onClick={() => handleSort("createdDate")}
                     >
                       Created Date
                     </TableSortLabel>
@@ -392,9 +414,9 @@ export default function ViewTickets() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredAndSortedTickets.map((ticket, index) => (
+                {tickets.map((ticket, index) => (
                   <TableRow
-                    key={ticket.id}
+                    key={ticket._id}
                     sx={{
                       backgroundColor: index % 2 === 0 ? "white" : "grey.50",
                       "&:hover": {
@@ -404,7 +426,7 @@ export default function ViewTickets() {
                   >
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {ticket.id}
+                        {ticket._id}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -418,20 +440,20 @@ export default function ViewTickets() {
                     <TableCell>{getStatusBadge(ticket.status)}</TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {ticket.createdDate}
+                        {timeAgo(ticket.timestamp)}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography
-                        variant="body2"
-                        sx={{
-                          maxWidth: 300,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
+                        variant="div"
+                        // sx={{
+                        //   maxWidth: 300,
+                        //   overflow: "hidden",
+                        //   textOverflow: "ellipsis",
+                        //   whiteSpace: "nowrap",
+                        // }}
                       >
-                        {ticket.description}
+                        {makeDescription(ticket)}
                       </Typography>
                     </TableCell>
                   </TableRow>

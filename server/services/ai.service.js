@@ -39,6 +39,7 @@ export async function issueReport(data_to_ai) {
       orderProblem:data_to_ai.order_problem,
       userId:data_to_ai.order.userId,
       aiResponse:data.polite_message,
+      issueType:data_to_ai.issueType,
       status:"Open"
     }
     const ticket=await createNewTicket(newTicket);   

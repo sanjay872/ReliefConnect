@@ -6,6 +6,7 @@ async function createNewTicket(data){
         userInput:data.userInput,
         orderProblem:data.orderProblem,
         userId:data.userId,
+        issueType:data.issueType,
         aiResponse:data.aiResponse,
         status:data.status
     }
