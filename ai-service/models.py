@@ -24,10 +24,10 @@ class Order(BaseModel):
 
 
 class OrderIssueRequest(BaseModel):
-    order: Order
-    order_problem: str
-    issue_type: str
-    image: Optional[str] = None   # Base64 string or null
+    order: Order                  # assuming Order is another Pydantic model
+    orderProblem: str
+    issueType: str
+    images: Optional[List[str]] = None   # list of Base64 strings or null
 
 
 class OrderDecisionResponse(BaseModel):

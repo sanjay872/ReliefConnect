@@ -57,15 +57,15 @@ export async function issueReportWithAI(req, res) {
     const data = req.body;
 
     // Validate required fields
-    if (!data.order || !data.order_problem || !data.issue_type) {
+    if (!data.order || !data.orderProblem || !data.issueType) {
       return res.status(400).json({ msg: "Missing required fields." });
     }
 
     const data_to_ai = {
       order: data.order,
-      order_problem: data.order_problem,
-      issue_type: data.issue_type,
-      image: data.image ? data.image : null  // Base64 string or null
+      orderProblem: data.orderProblem,
+      issueType: data.issueType,
+      images: data.images ? data.images : []  // Base64 string or null
     };
 
     console.log("📨 Data going to FastAPI:", data_to_ai);

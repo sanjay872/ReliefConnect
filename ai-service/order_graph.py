@@ -78,8 +78,8 @@ def fraud_check_node(state: State) -> State:
         Analyze for fraud:
 
         Order: {req.order.model_dump_json(indent=2)}
-        Issue Type: {req.issue_type}
-        Customer Problem: {req.order_problem}
+        Issue Type: {req.issueType}
+        Customer Problem: {req.orderProblem}
 
         Return ONLY JSON in this structure:
         {json_example}
@@ -91,20 +91,29 @@ def fraud_check_node(state: State) -> State:
     return {**state, "fraud_result": result}
 
 
+import json, base64
 
 def image_analysis_node(state: State) -> State:
-    req: OrderIssueRequest = state["request"]
+    req = state["request"]
 
-    if not req.image:
-        return state  # skip
+    if not req.images:
+        return state
 
-    data_url = f"data:image/jpeg;base64,{req.image}"
+    # img is already a base64 string
+    image_inputs = [
+        {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{img}"
+            }
+        }
+        for img in req.images
+    ]
+
+    order_json = json.dumps(req.order.model_dump(), indent=2)
 
     system = SystemMessage(
-        content=(
-            "You are an AI that verifies image evidence for damaged/missing item claims. "
-            "Respond ONLY with JSON."
-        )
+        content="You are an AI verifying image evidence. Respond ONLY with JSON."
     )
 
     human = HumanMessage(
@@ -112,25 +121,16 @@ def image_analysis_node(state: State) -> State:
             {
                 "type": "text",
                 "text": f"""
-Inspect the customer-provided image and evaluate if it supports the claim.
+Inspect the images and evaluate the claim.
 
-Order: {req.order.json(indent=2)}
-Issue Type: {req.issue_type}
-Problem Description: {req.order_problem}
+Order:
+{order_json}
 
-Return ONLY JSON:
-{{
-  "image_relevant": true/false,
-  "supports_claim": true/false,
-  "suspicious_signals": ["..."],
-  "short_summary": "..."
-}}
+Issue Type: {req.issueType}
+Problem Description: {req.orderProblem}
 """
             },
-            {
-                "type": "image_url",
-                "image_url": {"url": data_url}
-            }
+            *image_inputs
         ]
     )
 
@@ -138,6 +138,8 @@ Return ONLY JSON:
     result = extract_json(resp.content)
 
     return {**state, "image_result": result}
+
+
 
 
 def decision_node(state: State) -> State:
@@ -171,8 +173,8 @@ Make the FINAL DECISION.
 Order:
 {req.order.model_dump_json(indent=2)}
 
-Issue Type: {req.issue_type}
-Customer Problem: {req.order_problem}
+Issue Type: {req.issueType}
+Customer Problem: {req.orderProblem}
 
 Fraud Analysis:
 {json.dumps(fraud_result, indent=2)}
@@ -199,7 +201,7 @@ Return ONLY JSON using this structure:
 
 def has_image_condition(state: State) -> str:
     req: OrderIssueRequest = state["request"]
-    return "has_image" if req.image else "no_image"
+    return "has_image" if req.images else "no_image"
 
 
 def build_graph():

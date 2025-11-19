@@ -169,51 +169,61 @@ export default function ViewOrders() {
   //   images: File[] (multipart/form-data)
   // }
 
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
   // TODO: Integrate with backend - Submit issue to API
   // Replace this handler with actual API call when backend is ready
-  const handleSubmitIssue = async () => {
-    if (!selectedOrder || !issueData.issueType || !issueData.description) {
-      return;
-    }
+const handleSubmitIssue = async () => {
+  if (!selectedOrder || !issueData.issueType || !issueData.description) {
+    return;
+  }
 
-    setSubmittingIssue(true);
+  setSubmittingIssue(true);
 
-    try {
-      // Prepare form data for backend submission
-      const formData = {
-        orderId: selectedOrder.id,
-        issueType: issueData.issueType,
-        description: issueData.description,
-        images: issueData.images.map((img) => img.file), // File objects for FormData
-      };
+  try {
+    // Convert all uploaded images to Base64 strings
+    const base64Images = await Promise.all(
+      issueData.images.map(async (img) => {
+        const base64full = await fileToBase64(img.file);  // read file
+        return base64full.split(",")[1];                  // remove prefix
+      })
+    );
 
-      // TODO: Replace with actual API call
-      // const response = await createIssue(formData, { offline: false });
-      // if (response.success) {
-      //   setSnackbarMessage(response.message || "Issue submitted successfully!");
-      //   setSnackbarSeverity("success");
-      //   setSnackbarOpen(true);
-      //   handleCloseModal();
-      //   // Optionally refresh tickets list
-      // }
+    const report = {
+      order: selectedOrder,
+      orderProblem: issueData.description,
+      issueType: issueData.issueType,
+      images: base64Images,   // only base64 strings!
+    };
 
-      // Using mock submission for now
-      const response = await createIssue(formData, { offline: true });
-      setSnackbarMessage(
-        response.message || "Issue submitted successfully! (mock)"
-      );
+    console.log("Sending:", report);
+
+    const response = await createIssue(report, { offline: false });
+
+    if (response.success) {
+      setSnackbarMessage(response.message || "Issue submitted successfully!");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
       handleCloseModal();
-    } catch (err) {
-      console.error("Error submitting issue:", err);
-      setSnackbarMessage(err.message || "Failed to submit issue");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    } finally {
-      setSubmittingIssue(false);
     }
-  };
+
+  } catch (err) {
+    console.error("Error submitting issue:", err);
+    setSnackbarMessage(err.message || "Failed to submit issue");
+    setSnackbarSeverity("error");
+    setSnackbarOpen(true);
+  } finally {
+    setSubmittingIssue(false);
+  }
+};
+
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);

@@ -34,14 +34,15 @@ export async function issueReport(data_to_ai) {
 
     // create ticket
     const newTicket={
-      orderId:data_to_ai.order._id,
+      orderId:data_to_ai.order.id,
       userInput:"",
-      orderProblem:data_to_ai.order_problem,
+      orderProblem:data_to_ai.orderProblem,
       userId:data_to_ai.order.userId,
       aiResponse:data.polite_message,
       issueType:data_to_ai.issueType,
       status:"Open"
     }
+    console.log(newTicket);
     const ticket=await createNewTicket(newTicket);   
     return data;
   } catch (err) {

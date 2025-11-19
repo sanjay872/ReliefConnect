@@ -104,23 +104,10 @@ export const createIssue = async (issueData, options = {}) => {
   }
 
   // TODO: Replace with actual API call
-  // const formData = new FormData();
-  // formData.append("orderId", issueData.orderId);
-  // formData.append("issueType", issueData.issueType);
-  // formData.append("description", issueData.description);
-  // issueData.images.forEach((image, index) => {
-  //   formData.append(`images`, image.file);
-  // });
-  //
-  // const res = await api.post("/api/issues", formData, {
-  //   headers: {
-  //     Authorization: `Bearer ${getAuthToken()}`,
-  //     "Content-Type": "multipart/form-data",
-  //   },
-  // });
-  // return res.data;
+  const res = await api.post("/api/order/report", issueData);
+  return res.data;
 
-  throw new Error("Backend integration pending - use offline mode for testing");
+  //throw new Error("Backend integration pending - use offline mode for testing");
 };
 
 export const getOrders = async (userid,options = {}) => {
