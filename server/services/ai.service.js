@@ -44,7 +44,7 @@ export async function issueReport(data_to_ai) {
     }
     console.log(newTicket);
     const ticket=await createNewTicket(newTicket);   
-    return data;
+    return {...data,ticketId:ticket._id};
   } catch (err) {
     console.error("❌ Error in issueReport:", err.message);
     throw err;

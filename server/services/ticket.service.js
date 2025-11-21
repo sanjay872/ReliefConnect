@@ -15,7 +15,9 @@ async function createNewTicket(data){
 }
 
 async function updateTicketStatus(data){
-    const ticket=await Ticket.findOne({orderId:data.orderId});
+    console.log(data)
+    const ticket=await Ticket.findOne({_id:data.ticketId});
+    console.log(ticket)
     ticket.status=data.status;
     await ticket.save();
     return ticket;

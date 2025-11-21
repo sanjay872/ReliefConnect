@@ -23,11 +23,12 @@ export async function getTickets(req,res){
 }
 
 export async function updateTicketstatus(req,res){
+    console.log(req.body);
     try{
         const updatedTicket=await updateTicketStatus(req.body);
         res.status(200).json({"msg":"Status Updated!",ticket:updatedTicket});
     }
     catch(e){
-        res.status(500).json({"msg":"Error in fetching tickets"});
+        res.status(500).json({"msg":e});
     }
 }

@@ -255,4 +255,8 @@ export const getTickets = async (userId) => {
   //throw new Error("Backend integration pending - use offline mode for testing");
 };
 
+export const updateTicketStatus = async (data) => {
+   await api.put(`/api/ticket`,data);
+}
+
 export default api;

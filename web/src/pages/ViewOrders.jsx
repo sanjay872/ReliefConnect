@@ -35,9 +35,10 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import { getOrders, createIssue } from "../services/api";
+import { getOrders, createIssue, updateTicketStatus } from "../services/api";
 import { useAuth } from "../utils/authContext";
 import { mockOrders } from "../data/mockOrders";
+import AIResponseActionCard from "./AIResponseActionCard";
 
 const issueTypes = [
   "Delivery Delay",
@@ -81,6 +82,9 @@ export default function ViewOrders() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const {auth}=useAuth();
+  const[issueSubmitted, setIssueSubmitted]=useState(false);
+  const[aIResponse,setAIResponse]=useState(null);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   // TODO: Integrate with backend - Fetch orders from API
   // Replace this useEffect with actual API call when backend is ready
@@ -206,12 +210,21 @@ const handleSubmitIssue = async () => {
     console.log("Sending:", report);
 
     const response = await createIssue(report, { offline: false });
+    setAIResponse(response);
+    setIssueSubmitted(true);
+    setIssueModalOpen(false);
+    setAiModalOpen(true);   // <-- show second modal
 
-    if (response.success) {
+    console.log(response);
+
+    if (response) {
+      console.log(response);
+      console.log(issueSubmitted)
       setSnackbarMessage(response.message || "Issue submitted successfully!");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
-      handleCloseModal();
+      setIssueModalOpen(false);
+      //handleCloseModal();
     }
 
   } catch (err) {
@@ -256,6 +269,28 @@ const handleSubmitIssue = async () => {
     year: "numeric"
   });
 }
+
+async function closeTicket(){
+    console.log(selectedOrder);
+    const ticketStatus={
+        ticketId:aIResponse.ticketId,
+        status:"closed",
+    };
+    await updateTicketStatus(ticketStatus);
+    setIssueSubmitted(false);
+    handleCloseModal();
+  }
+
+  async function esclateTicket(){
+    const ticketStatus={
+      ticketId:aIResponse.ticketId,
+      status:"review",
+    };
+    await updateTicketStatus(ticketStatus);
+    setIssueSubmitted(false);
+    handleCloseModal();
+  }
+
 
 
   // Mobile card view
@@ -702,20 +737,18 @@ const handleSubmitIssue = async () => {
       </Dialog>
 
       {/* Success/Error Snackbar for issue submission */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+      <Dialog open={aiModalOpen} onClose={() => setAiModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>AI Decision</DialogTitle>
+        <DialogContent>
+          <AIResponseActionCard
+            aiData={aIResponse}
+            action1Label="Approve"
+            action2Label="Reject"
+            onAction1={() => { closeTicket(); setAiModalOpen(false); }}
+            onAction2={() => { esclateTicket(); setAiModalOpen(false); }}
+          />
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 }
