@@ -58,7 +58,7 @@ const AIResponseActionCard = ({
           <Typography sx={{ mt: 0.5 }}>{polite_message}</Typography>
         </Box>
 
-        {/* Fraud Details */}
+        {/* Fraud Details
         <Box mb={2}>
           <Typography variant="subtitle2" color="text.secondary">Fraud Check</Typography>
           <Stack direction="row" spacing={1} mt={1}>
@@ -71,7 +71,7 @@ const AIResponseActionCard = ({
               color={fraud_risk_level === "high" ? "error" : "info"}
             />
           </Stack>
-        </Box>
+        </Box> */}
 
         {/* Internal Notes */}
         {internal_notes && (
